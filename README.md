@@ -8,7 +8,7 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 
 ## Portfolio Demo
 
-[![Shield & Shot Portfolio Demo](https://img.youtube.com/vi/p6IyCVZkcaY/maxresdefault.jpg)](https://youtu.be/p6IyCVZkcaY)
+[![Shield & Shot Portfolio Demo](https://i.ytimg.com/vi/p6IyCVZkcaY/hqdefault.jpg)](https://youtu.be/p6IyCVZkcaY)
 
 - [YouTube Portfolio Demo](https://youtu.be/p6IyCVZkcaY)
 - [Interactive GitHub Pages](https://sj97p.github.io/Shield-Shot-CodeMap/)

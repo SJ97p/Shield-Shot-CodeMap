@@ -1,119 +1,103 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shield & Shot Code Map</title>
-    <link rel="stylesheet" href="./style.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script defer src="./app.js"></script>
-  </head>
-  <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Unity Gameplay / Network Portfolio</p>
-        <h1>Shield & Shot Code Map</h1>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shield & Shot Code Map</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">System Design Portfolio</p>
+      <h1>Shield & Shot Code Map</h1>
+    </div>
+    <nav class="toplinks" aria-label="External links">
+      <a href="https://youtu.be/p6IyCVZkcaY" target="_blank" rel="noreferrer">Demo Video</a>
+      <a href="https://github.com/sj97p/Shield-Shot-CodeMap" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="README.md">README</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="panel-head">
+        <h2>Explorer</h2>
       </div>
-      <nav class="top-actions" aria-label="external links">
-        <a href="https://youtu.be/p6IyCVZkcaY" target="_blank" rel="noreferrer">Demo Video</a>
-        <a href="https://github.com/sj97p/Shield-Shot-CodeMap#readme" target="_blank" rel="noreferrer">README</a>
-        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Docs</a>
-        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/blob/main/docs/class-diagram.md" target="_blank" rel="noreferrer">Class Diagram</a>
-        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/tree/main/src/Assets/_Project/_Scripts" target="_blank" rel="noreferrer">Source</a>
-      </nav>
-    </header>
+      <div id="tree" class="tree"></div>
+    </aside>
 
-    <main class="app-shell" id="app-shell">
-      <aside class="sidebar" aria-label="system tree">
-        <div class="sidebar-head">
-          <span class="label">Explorer</span>
-          <button id="reset-view" type="button">전체 구조</button>
+    <section class="main-panel">
+      <div class="panel-head graph-head">
+        <div>
+          <h2 id="node-title">Overview</h2>
+          <p id="node-summary"></p>
         </div>
-        <div id="tree" class="tree"></div>
-      </aside>
+        <div class="zoom-controls" aria-label="Graph zoom controls">
+          <button id="zoom-out" type="button" title="Zoom out">-</button>
+          <button id="zoom-reset" type="button" title="Reset zoom">100%</button>
+          <button id="zoom-in" type="button" title="Zoom in">+</button>
+        </div>
+      </div>
+      <div id="graph-wrap" class="graph-wrap">
+        <div id="graph" class="mermaid"></div>
+      </div>
 
-      <section class="canvas-panel" aria-label="UML and system map">
-        <div class="panel-head">
-          <div>
-            <span id="scope-label" class="label">Overview</span>
-            <h2 id="graph-title">Gameplay / PvP System Map</h2>
-          </div>
-          <div class="graph-nav">
-            <button id="graph-back" type="button" disabled>뒤로</button>
-            <div id="breadcrumbs" class="breadcrumbs"></div>
-          </div>
-        </div>
-
-        <div class="graph-wrap">
-          <div id="graph" class="mermaid"></div>
-        </div>
-
-        <div class="hint-bar">
-          <span>UML 노드와 Key Classes, 함수명을 클릭하면 설계 의도, Evidence, 코드 위치를 함께 확인할 수 있습니다.</span>
-        </div>
+      <section class="detail-grid">
+        <article class="detail-card">
+          <h3>설계 의도</h3>
+          <p id="intent"></p>
+        </article>
+        <article class="detail-card">
+          <h3>진행 중 고민 / 초기 구조의 한계</h3>
+          <p id="issue"></p>
+        </article>
+        <article class="detail-card">
+          <h3>최종 구조</h3>
+          <p id="final"></p>
+        </article>
+        <article class="detail-card">
+          <h3>아쉬운 점과 다음 개선</h3>
+          <p id="next"></p>
+        </article>
       </section>
 
-      <div class="splitter" data-resizer="graph-detail" role="separator" aria-orientation="vertical" title="그래프와 설명 영역 폭 조절"></div>
-
-      <aside class="detail-panel" aria-label="selected node detail">
-        <div class="detail-head">
-          <span id="detail-kind" class="label">Selected</span>
-          <h2 id="detail-title">Shield & Shot</h2>
-          <p id="detail-summary"></p>
+      <section class="script-section">
+        <div class="section-head">
+          <h2>Core Scripts</h2>
+          <p>선택한 시스템을 구성하는 핵심 스크립트입니다. 클래스명을 누르면 상세 다이어그램으로 이동합니다.</p>
         </div>
+        <div id="script-list" class="script-list"></div>
+      </section>
 
-        <section class="detail-section">
-          <h3>설계 의도</h3>
-          <p id="detail-intent"></p>
-        </section>
-
-        <section class="detail-section">
-          <h3>진행 중 고민 / 초기 구조의 한계</h3>
-          <p id="detail-issue"></p>
-        </section>
-
-        <section class="detail-section">
-          <h3>최종 구조</h3>
-          <p id="detail-final"></p>
-        </section>
-
-        <section class="detail-section">
-          <h3>아쉬운 점과 다음 개선</h3>
-          <p id="detail-next"></p>
-        </section>
-
-        <section class="detail-section">
-          <h3>Evidence</h3>
-          <div id="evidence-list" class="evidence-list"></div>
-        </section>
-
-        <section class="detail-section">
-          <h3>Key Classes</h3>
-          <div id="class-list" class="chip-list"></div>
-        </section>
-      </aside>
-
-      <div class="splitter" data-resizer="detail-code" role="separator" aria-orientation="vertical" title="설명과 코드 영역 폭 조절"></div>
-
-      <aside class="code-panel" aria-label="selected source code preview">
-        <div class="code-head">
-          <div>
-            <span class="label">Source</span>
-            <h2>Code Preview</h2>
-          </div>
-          <a id="code-link" href="#" target="_blank" rel="noreferrer">Open file</a>
+      <section class="evidence-section">
+        <div class="section-head">
+          <h2>Evidence</h2>
+          <p>GIF/이미지를 클릭하면 크게 볼 수 있습니다.</p>
         </div>
-        <div id="code-methods" class="code-methods" aria-label="method shortcuts"></div>
-        <pre id="code-scroll"><code id="code-preview">시스템이나 클래스를 선택하면 관련 코드가 표시됩니다.</code></pre>
-      </aside>
-    </main>
+        <div id="evidence" class="evidence-grid"></div>
+      </section>
+    </section>
 
-    <div id="media-modal" class="media-modal" aria-hidden="true">
-      <button id="modal-close" class="modal-close" type="button" aria-label="close preview">×</button>
-      <figure class="modal-body">
-        <img id="modal-image" alt="" />
-        <figcaption id="modal-caption"></figcaption>
-      </figure>
-    </div>
-  </body>
+    <aside class="code-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Code Preview</h2>
+          <p id="code-path"></p>
+        </div>
+      </div>
+      <div id="code-actions" class="code-actions"></div>
+      <pre id="code-preview" class="code-preview"><code>왼쪽 Explorer 또는 그래프 노드에서 시스템/클래스를 선택하세요.</code></pre>
+    </aside>
+  </main>
+
+  <dialog id="media-modal" class="media-modal">
+    <button id="modal-close" class="modal-close" type="button">Close</button>
+    <img id="modal-image" alt="" />
+    <p id="modal-caption"></p>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
 </html>
