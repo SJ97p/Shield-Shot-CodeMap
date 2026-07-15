@@ -561,6 +561,8 @@ const treeGroups = [
 let currentNodeId = "overview";
 let currentCodeFiles = [];
 let graphScale = 1;
+let graphBaseSize = { width: 760, height: 420 };
+const navStack = [];
 
 const els = {
   tree: document.getElementById("tree"),
@@ -632,10 +634,13 @@ function renderTree() {
   });
 }
 
-async function selectNode(id) {
+async function selectNode(id, options = {}) {
   const node = nodes[id];
   if (!node) return;
+  const shouldPushHistory = options.pushHistory !== false && currentNodeId && currentNodeId !== id;
+  if (shouldPushHistory) navStack.push(currentNodeId);
   currentNodeId = id;
+  updateBackButton();
   graphScale = 1;
   document.querySelectorAll(".tree-item").forEach((item) => item.classList.toggle("active", item.dataset.id === id));
   els.title.textContent = node.title;
@@ -693,6 +698,7 @@ async function renderGraph(node) {
   els.graph.textContent = node.graph || "flowchart TD\nempty[No graph]";
   try {
     await mermaid.run({ nodes: [els.graph] });
+    captureGraphBaseSize();
     applyGraphScale();
     attachGraphClicks(node);
   } catch (err) {
@@ -839,9 +845,23 @@ function openMedia(item) {
   modal.showModal();
 }
 
+function captureGraphBaseSize() {
+  const svg = els.graph.querySelector("svg");
+  if (!svg) return;
+  const viewBox = svg.viewBox && svg.viewBox.baseVal;
+  const width = viewBox && viewBox.width ? viewBox.width : parseFloat(svg.getAttribute("width")) || svg.getBoundingClientRect().width || 760;
+  const height = viewBox && viewBox.height ? viewBox.height : parseFloat(svg.getAttribute("height")) || svg.getBoundingClientRect().height || 420;
+  graphBaseSize = { width: Math.max(width, 320), height: Math.max(height, 220) };
+}
+
 function applyGraphScale() {
-  els.graph.style.transform = `scale(${graphScale})`;
-  els.graph.style.width = `${100 / graphScale}%`;
+  const svg = els.graph.querySelector("svg");
+  if (svg) {
+    svg.style.width = `${graphBaseSize.width * graphScale}px`;
+    svg.style.height = `${graphBaseSize.height * graphScale}px`;
+  }
+  els.graph.style.width = `${graphBaseSize.width * graphScale}px`;
+  els.graph.style.height = `${graphBaseSize.height * graphScale}px`;
   document.getElementById("zoom-reset").textContent = `${Math.round(graphScale * 100)}%`;
 }
 
@@ -859,8 +879,25 @@ els.graphWrap.addEventListener("wheel", (event) => {
   setGraphScale(graphScale + (event.deltaY < 0 ? 0.12 : -0.12));
 }, { passive: false });
 
+function updateBackButton() {
+  const button = document.getElementById("nav-back");
+  if (!button) return;
+  button.disabled = navStack.length === 0;
+}
+
+document.getElementById("nav-back").addEventListener("click", () => {
+  const previous = navStack.pop();
+  if (previous) selectNode(previous, { pushHistory: false });
+  updateBackButton();
+});
+
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const enabled = document.body.classList.toggle("light-theme");
+  document.getElementById("theme-toggle").textContent = enabled ? "Black" : "White";
+});
+
 document.getElementById("modal-close").addEventListener("click", () => document.getElementById("media-modal").close());
 
 window.selectNode = selectNode;
 renderTree();
-selectNode("overview");
+selectNode("overview", { pushHistory: false });

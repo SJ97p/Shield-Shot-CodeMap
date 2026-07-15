@@ -16,7 +16,7 @@
     <nav class="toplinks" aria-label="External links">
       <a href="https://youtu.be/p6IyCVZkcaY" target="_blank" rel="noreferrer">Demo Video</a>
       <a href="https://github.com/sj97p/Shield-Shot-CodeMap" target="_blank" rel="noreferrer">GitHub</a>
-      <a href="README.md">README</a>
+      <button id="theme-toggle" type="button" title="Toggle theme">White</button>
     </nav>
   </header>
 
@@ -34,10 +34,13 @@
           <h2 id="node-title">Overview</h2>
           <p id="node-summary"></p>
         </div>
-        <div class="zoom-controls" aria-label="Graph zoom controls">
-          <button id="zoom-out" type="button" title="Zoom out">-</button>
-          <button id="zoom-reset" type="button" title="Reset zoom">100%</button>
-          <button id="zoom-in" type="button" title="Zoom in">+</button>
+        <div class="graph-tools">
+          <button id="nav-back" class="back-button" type="button" title="Go back" disabled>Back</button>
+          <div class="zoom-controls" aria-label="Graph zoom controls">
+            <button id="zoom-out" type="button" title="Zoom out">-</button>
+            <button id="zoom-reset" type="button" title="Reset zoom">100%</button>
+            <button id="zoom-in" type="button" title="Zoom in">+</button>
+          </div>
         </div>
       </div>
       <div id="graph-wrap" class="graph-wrap">
