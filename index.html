@@ -1,0 +1,78 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shield & Shot Code Map</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Unity Gameplay / Network Portfolio</p>
+        <h1>Shield & Shot Code Map</h1>
+      </div>
+      <nav class="top-actions" aria-label="links">
+        <a href="https://github.com/sj97p/Shield-Shot-CodeMap#readme" target="_blank" rel="noreferrer">README</a>
+        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Architecture</a>
+        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/blob/main/docs/class-diagram.md" target="_blank" rel="noreferrer">Class Diagram</a>
+        <a href="https://github.com/sj97p/Shield-Shot-CodeMap/tree/main/src/Assets/_Project/_Scripts" target="_blank" rel="noreferrer">Source Snapshot</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <span class="label">Systems</span>
+          <button id="reset-view" type="button">Overview</button>
+        </div>
+        <div id="system-list" class="system-list"></div>
+      </aside>
+
+      <section class="graph-panel">
+        <div class="panel-head">
+          <span id="scope-label" class="label">Overview</span>
+          <h2 id="graph-title">Gameplay System Design Map</h2>
+        </div>
+        <div class="graph-wrap">
+          <div id="graph" class="mermaid"></div>
+        </div>
+      </section>
+
+      <aside class="detail-panel">
+        <span id="detail-kind" class="label">Selected</span>
+        <h2 id="detail-title">Shield & Shot</h2>
+        <p id="detail-summary"></p>
+
+        <section>
+          <h3>설계 의도</h3>
+          <p id="detail-intent"></p>
+        </section>
+
+        <section>
+          <h3>시행착오 / 선택</h3>
+          <p id="detail-postmortem"></p>
+        </section>
+
+        <section>
+          <h3>결과</h3>
+          <p id="detail-result"></p>
+        </section>
+
+        <section>
+          <h3>Key Classes</h3>
+          <div id="class-list" class="chip-list"></div>
+        </section>
+
+        <section>
+          <h3>Code Preview</h3>
+          <div id="code-tabs" class="code-tabs"></div>
+          <pre><code id="code-preview">시스템을 선택하면 관련 코드 스냅샷이 표시됩니다.</code></pre>
+        </section>
+      </aside>
+    </main>
+  </body>
+</html>
+
