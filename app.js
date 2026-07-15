@@ -637,11 +637,11 @@ function renderTree() {
 async function selectNode(id, options = {}) {
   const node = nodes[id];
   if (!node) return;
+  const scrollState = captureScrollState();
   const shouldPushHistory = options.pushHistory !== false && currentNodeId && currentNodeId !== id;
   if (shouldPushHistory) navStack.push(currentNodeId);
   currentNodeId = id;
   updateBackButton();
-  graphScale = 1;
   document.querySelectorAll(".tree-item").forEach((item) => item.classList.toggle("active", item.dataset.id === id));
   els.title.textContent = node.title;
   els.summary.textContent = node.summary || "";
@@ -660,6 +660,7 @@ async function selectNode(id, options = {}) {
     els.codeActions.innerHTML = "";
     els.codePreview.innerHTML = "<code>이 노드는 구조 설명 중심입니다. Core Scripts에서 클래스를 선택하면 코드 스냅샷이 표시됩니다.</code>";
   }
+  if (options.preserveScroll !== false) restoreScrollState(scrollState);
 }
 
 function renderScripts(node) {
@@ -817,7 +818,9 @@ function findLine(lines, needle) {
 function scrollToLine(lineNo) {
   requestAnimationFrame(() => {
     const line = els.codePreview.querySelector(`[data-line="${lineNo}"]`);
-    if (line) line.scrollIntoView({ block: "center" });
+    if (!line) return;
+    const targetTop = line.offsetTop - els.codePreview.clientHeight * 0.45;
+    els.codePreview.scrollTop = Math.max(0, targetTop);
   });
 }
 
@@ -836,6 +839,33 @@ function escapeHtml(value) {
 
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function captureScrollState() {
+  const main = document.querySelector(".main-panel");
+  return {
+    windowX: window.scrollX,
+    windowY: window.scrollY,
+    mainTop: main ? main.scrollTop : 0,
+    mainLeft: main ? main.scrollLeft : 0,
+    graphTop: els.graphWrap ? els.graphWrap.scrollTop : 0,
+    graphLeft: els.graphWrap ? els.graphWrap.scrollLeft : 0,
+  };
+}
+
+function restoreScrollState(state) {
+  requestAnimationFrame(() => {
+    const main = document.querySelector(".main-panel");
+    if (main) {
+      main.scrollTop = state.mainTop;
+      main.scrollLeft = state.mainLeft;
+    }
+    if (els.graphWrap) {
+      els.graphWrap.scrollTop = state.graphTop;
+      els.graphWrap.scrollLeft = state.graphLeft;
+    }
+    window.scrollTo(state.windowX, state.windowY);
+  });
 }
 
 function openMedia(item) {
@@ -892,12 +922,12 @@ document.getElementById("nav-back").addEventListener("click", () => {
 });
 
 document.getElementById("theme-toggle").addEventListener("click", () => {
-  const enabled = document.body.classList.toggle("light-theme");
-  document.getElementById("theme-toggle").textContent = enabled ? "Black" : "White";
+  const enabled = document.body.classList.toggle("dark-theme");
+  document.getElementById("theme-toggle").textContent = enabled ? "White" : "Black";
 });
 
 document.getElementById("modal-close").addEventListener("click", () => document.getElementById("media-modal").close());
 
 window.selectNode = selectNode;
 renderTree();
-selectNode("overview", { pushHistory: false });
+selectNode("overview", { pushHistory: false, preserveScroll: false });
