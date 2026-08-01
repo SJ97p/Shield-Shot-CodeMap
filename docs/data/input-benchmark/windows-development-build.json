@@ -1,0 +1,93 @@
+﻿{
+    "schemaVersion":  "1.0",
+    "completedAtUtc":  "2026-07-25T16:43:57.4852693Z",
+    "device":  {
+                   "deviceModel":  "B850 Pro RS WiFi (ASRock)",
+                   "deviceName":  "Windows Development PC",
+                   "operatingSystem":  "Windows 11  (10.0.26200)",
+                   "processorType":  "AMD Ryzen 9 9950X 16-Core Processor ",
+                   "processorCount":  32,
+                   "processorFrequencyMHz":  4292,
+                   "systemMemoryMB":  63061,
+                   "graphicsDeviceName":  "NVIDIA GeForce RTX 5070 Ti",
+                   "graphicsMemoryMB":  15995,
+                   "screenWidth":  920,
+                   "screenHeight":  1618,
+                   "targetFrameRate":  60,
+                   "vSyncCount":  0,
+                   "platform":  "WindowsPlayer",
+                   "unityVersion":  "6000.3.6f1",
+                   "applicationVersion":  "0.1"
+               },
+    "settings":  {
+                     "warmupRuns":  1,
+                     "measuredRuns":  10,
+                     "durationSeconds":  10.0,
+                     "samplesPerSecond":  120,
+                     "viewportWidth":  920.0,
+                     "viewportHeight":  1618.0,
+                     "recorderCapacity":  8192
+                 },
+    "v1":  {
+               "version":  "V1",
+               "runCount":  10,
+               "averageMarkerTotalMilliseconds":  100.14577999999998,
+               "medianMarkerTotalMilliseconds":  100.28090000000006,
+               "p95MarkerTotalMilliseconds":  102.22006499999994,
+               "maximumMarkerTotalMilliseconds":  102.36599999999996,
+               "metrics":  [
+                               {
+                                   "markerName":  "Input.V1.GestureUpdate",
+                                   "totalCallCount":  5990,
+                                   "averageRunTotalMilliseconds":  95.57103,
+                                   "medianRunTotalMilliseconds":  95.63235000000006,
+                                   "p95RunTotalMilliseconds":  97.58609499999993,
+                                   "maximumRunTotalMilliseconds":  97.68009999999996
+                               },
+                               {
+                                   "markerName":  "Input.V1.ProcessSamples",
+                                   "totalCallCount":  12010,
+                                   "averageRunTotalMilliseconds":  4.574749999999997,
+                                   "medianRunTotalMilliseconds":  4.548149999999996,
+                                   "p95RunTotalMilliseconds":  4.7364999999999999,
+                                   "maximumRunTotalMilliseconds":  4.777900000000002
+                               }
+                           ]
+           },
+    "v2":  {
+               "version":  "V2",
+               "runCount":  10,
+               "averageMarkerTotalMilliseconds":  23.67759999999998,
+               "medianMarkerTotalMilliseconds":  23.690549999999989,
+               "p95MarkerTotalMilliseconds":  24.407684999999984,
+               "maximumMarkerTotalMilliseconds":  24.767999999999974,
+               "metrics":  [
+                               {
+                                   "markerName":  "Input.V2.AttackTick",
+                                   "totalCallCount":  6011,
+                                   "averageRunTotalMilliseconds":  2.967670000000003,
+                                   "medianRunTotalMilliseconds":  2.9380500000000029,
+                                   "p95RunTotalMilliseconds":  3.1042550000000057,
+                                   "maximumRunTotalMilliseconds":  3.121400000000002
+                               },
+                               {
+                                   "markerName":  "Input.V2.CompleteFrame",
+                                   "totalCallCount":  6001,
+                                   "averageRunTotalMilliseconds":  14.478629999999982,
+                                   "medianRunTotalMilliseconds":  14.43554999999998,
+                                   "p95RunTotalMilliseconds":  14.788634999999984,
+                                   "maximumRunTotalMilliseconds":  14.802899999999977
+                               },
+                               {
+                                   "markerName":  "Input.V2.ProcessSamples",
+                                   "totalCallCount":  12010,
+                                   "averageRunTotalMilliseconds":  6.2312999999999969,
+                                   "medianRunTotalMilliseconds":  6.137849999999993,
+                                   "p95RunTotalMilliseconds":  6.757699999999996,
+                                   "maximumRunTotalMilliseconds":  7.033999999999996
+                               }
+                           ]
+           },
+    "v1ToV2AverageMarkerTotalChangePercent":  -76.35686695934668,
+    "summary":  "[Input Batch Comparison] Completed | Warmups: 1 | Measured Runs Per Version: 10\r\n=== V1 ===\r\nMarker Total per Run | Avg: 100.1458 ms | Median: 100.2809 ms | P95: 102.2201 ms | Max: 102.3660 ms\r\n  - Input.V1.GestureUpdate | Calls: 5990 | Run Total Avg: 95.5710 ms | Median: 95.6324 ms | P95: 97.5861 ms | Max: 97.6801 ms\r\n  - Input.V1.ProcessSamples | Calls: 12010 | Run Total Avg: 4.5748 ms | Median: 4.5482 ms | P95: 4.7365 ms | Max: 4.7779 ms\r\n=== V2 ===\r\nMarker Total per Run | Avg: 23.6776 ms | Median: 23.6906 ms | P95: 24.4077 ms | Max: 24.7680 ms\r\n  - Input.V2.AttackTick | Calls: 6011 | Run Total Avg: 2.9677 ms | Median: 2.9381 ms | P95: 3.1043 ms | Max: 3.1214 ms\r\n  - Input.V2.CompleteFrame | Calls: 6001 | Run Total Avg: 14.4786 ms | Median: 14.4356 ms | P95: 14.7886 ms | Max: 14.8029 ms\r\n  - Input.V2.ProcessSamples | Calls: 12010 | Run Total Avg: 6.2313 ms | Median: 6.1378 ms | P95: 6.7577 ms | Max: 7.0340 ms\r\n=== V1 -\u003e V2 Average Marker Total ===\r\nV1: 100.1458 ms | V2: 23.6776 ms | Change: -76.36%"
+}

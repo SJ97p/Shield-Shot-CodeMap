@@ -116,6 +116,14 @@ namespace Shield_Shot.GameplayCore.Weapon.Core
             projectileFireHandler = ResolveProjectileFireHandler();
         }
 
+        protected virtual void OnEnable()
+        {
+            // 무기가 새로 장착/스왑되어 활성화되는 순간, 이전에 누르고 있던 터치가
+            // 그대로 이어져서 쿨타임 0인 새 무기가 즉시 발사돼버리는 걸 막기 위해
+            // 장착 직후엔 항상 쿨타임을 한 번 강제로 채운다.
+            StartAttackCooldown();
+        }
+
         protected virtual void Update()
         {
             if (_attackCooldownTimer > 0f)
@@ -216,6 +224,43 @@ namespace Shield_Shot.GameplayCore.Weapon.Core
         {
             _vfxTimer = 0f;
             _isFullChargeVFXPlayed = false;
+        }
+        public virtual void ApplyAttackInputState(
+    Vector2 aimVector,
+    float chargeRatio)
+        {
+            if (IsCooldownActive)
+            {
+                chargeController?.Reset();
+                aimLineRenderer?.Hide();
+                return;
+            }
+
+            aimController?.UpdateAimDirection(
+                aimVector);
+
+            ApplyLocalRotation();
+
+            chargeController?.SetChargeRatio(
+                chargeRatio);
+
+            if (firePoint != null)
+            {
+                aimLineRenderer?.Show(this);
+
+                aimLineRenderer?.UpdateLine(
+                    AimDirection,
+                    ChargeRatio,
+                    firePoint.position);
+            }
+
+            OnAttackInputStateApplied(
+                ChargeRatio);
+        }
+
+        protected virtual void OnAttackInputStateApplied(
+            float chargeRatio)
+        {
         }
 
         protected virtual void OnFullChargeAchieved() { }

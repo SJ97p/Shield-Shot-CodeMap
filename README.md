@@ -1,6 +1,6 @@
 # Shield & Shot Code Map
 
-Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당한 게임플레이 시스템 설계, 전투/증강 구조, 속성 필드, PvP 네트워크 전투 안정화 과정을 정리한 포트폴리오용 Code Map입니다.
+Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당한 게임플레이 시스템 설계, 전투/증강 구조, 속성 필드, PvP 네트워크 전투 안정화와 **Input System V2 리팩토링·성능 검증** 과정을 정리한 포트폴리오용 Code Map입니다.
 
 이 저장소는 전체 Unity 프로젝트를 공개하기보다, 제가 설계 방향을 잡고 직접 통합/수정한 **Projectile Behavior 기반 증강 구조, ElementField 데이터 그리드, PvP 네트워크 투사체/피격/VFX 동기화, 무기/방패 네트워크 스폰, 시행착오 복구 과정**을 중심으로 설명합니다.
 
@@ -24,7 +24,7 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 | Engine / Language | Unity / C# |
 | Team | 6인 팀 프로젝트 |
 | My Role | Game Design, PM, Gameplay System Design, Combat/Network System Design, System Integration |
-| Main Focus | Projectile Augment, ElementField, PvP Network Combat, Debugging & Stabilization |
+| Main Focus | Input System V2, Projectile Augment, ElementField, PvP Network Combat, Debugging & Stabilization |
 | Repository Goal | 기능 나열보다 설계 의도, 시스템 흐름, 시행착오, 통합 과정을 보여주는 것 |
 
 ## My Role
@@ -39,6 +39,8 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - Photon Fusion 기반 PvP 전투 구조, 네트워크 무기/방패/투사체 흐름 설계 및 안정화
 - PvP hit 판정, VFX, damage popup, aim line 예측 오류 등 핵심 런타임 문제 디버깅
 - `SceneController` 기반 씬 context 흐름의 뼈대 설계
+- 기존 입력 코드를 보존한 채 V2를 병렬 구축하고, 입력 수집·필터·라우팅·제스처 해석·무기 적용 책임을 분리
+- 동일 입력 시나리오와 Profiler marker를 이용해 Editor, Windows Development Build, Android 실기기에서 V1/V2 성능 비교
 
 일부 하위 구현은 팀원과 분담했지만, 주요 요구사항과 구조 방향은 제가 설계했고, 구현된 구조를 직접 수정/검증하며 실제 플레이 흐름에 맞게 정리했습니다.
 
@@ -52,6 +54,7 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - Network Weapon / Shield Spawn
 - Aim Line Prediction과 실제 projectile 기준 정렬
 - 병합 후 PvP 네트워크 기능 복구
+- Input System V2 리팩토링과 재현 가능한 V1/V2 벤치마크
 
 ### Collaboration / Integration Scope
 
@@ -69,6 +72,8 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 | PvP Hit Detection / Feedback | hit candidate, damage, popup, VFX 단계를 분리해 복구 | hitbox/layer 정규화와 RPC feedback 경로 구성 |
 | Aim Prediction Alignment | 조준선과 실제 투사체의 시작점/반경/layer 기준을 통일 | network projectile spawn offset/radius 기반 예측 provider 추가 |
 | Network Weapon & Shield Spawn | 로비 장착 데이터를 PvP 원격 클라이언트에서도 ID 기반으로 복구 | WeaponId/ShieldId 기반 network prefab 생성 흐름 정리 |
+| Input System V2 | 한 클래스에 얽힌 입력 수집·UI 차단·제스처·전투 적용을 단계별 계약으로 분리 | SOLID 기반 파이프라인과 설정 가능한 공격/방어 영역 구성 |
+| Input V1/V2 Benchmark | 체감 대신 동일 샘플·동일 호출 수로 두 구현을 반복 측정 | Windows 평균 marker total 76.36%, Galaxy S23+ 65.83% 감소 |
 
 ## Visual Evidence
 
@@ -101,12 +106,15 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - Damage popup sync
 - Seed based arena generation
 - SceneController context flow
+- Input System V2 attack / shield control
+- Runtime input layout settings and persistence
+- Deterministic V1/V2 comparison runner
 
 ### Deferred / In Progress
 
 - Active cell network sync
 - Wind/Ice network visual full sync
-- Profiler 기반 최적화 검증
+- 다양한 Android 기기군에서의 추가 성능 검증
 - PvP 밸런싱 및 장기 플레이 검증
 
 ## Public Snapshot Policy
@@ -130,3 +138,5 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - [Network Weapon & Shield Spawn](docs/systems/network-weapon-shield-spawn.md)
 - [PvP Network Recovery Postmortem](docs/systems/pvp-network-recovery-postmortem.md)
 - [Current Status & Roadmap](docs/systems/current-status-and-roadmap.md)
+- [Input System V2 Refactoring](docs/systems/input-system-v2-refactoring.md)
+- [Input System V2 Benchmark](docs/systems/input-system-v2-benchmark.md)

@@ -1,0 +1,93 @@
+﻿{
+    "schemaVersion":  "1.0",
+    "completedAtUtc":  "2026-07-26T06:22:59.9470250Z",
+    "device":  {
+                   "deviceModel":  "samsung SM-S916N",
+                   "deviceName":  "Galaxy S23+",
+                   "operatingSystem":  "Android OS 15 / API-35 (AP3A.240905.015.A2/S916NKSU6DYD9)",
+                   "processorType":  "ARM64 FP ASIMD AES",
+                   "processorCount":  8,
+                   "processorFrequencyMHz":  6720,
+                   "systemMemoryMB":  7074,
+                   "graphicsDeviceName":  "Adreno (TM) 740",
+                   "graphicsMemoryMB":  7330,
+                   "screenWidth":  1080,
+                   "screenHeight":  2340,
+                   "targetFrameRate":  60,
+                   "vSyncCount":  0,
+                   "platform":  "Android",
+                   "unityVersion":  "6000.3.6f1",
+                   "applicationVersion":  "0.1"
+               },
+    "settings":  {
+                     "warmupRuns":  1,
+                     "measuredRuns":  10,
+                     "durationSeconds":  10.0,
+                     "samplesPerSecond":  120,
+                     "viewportWidth":  1080.0,
+                     "viewportHeight":  2340.0,
+                     "recorderCapacity":  8192
+                 },
+    "v1":  {
+               "version":  "V1",
+               "runCount":  10,
+               "averageMarkerTotalMilliseconds":  360.2023121999999,
+               "medianMarkerTotalMilliseconds":  361.2720599999999,
+               "p95MarkerTotalMilliseconds":  364.5108266499998,
+               "maximumMarkerTotalMilliseconds":  364.8852009999997,
+               "metrics":  [
+                               {
+                                   "markerName":  "Input.V1.GestureUpdate",
+                                   "totalCallCount":  5990,
+                                   "averageRunTotalMilliseconds":  334.4606390999999,
+                                   "medianRunTotalMilliseconds":  335.38589150000026,
+                                   "p95RunTotalMilliseconds":  338.75659364999975,
+                                   "maximumRunTotalMilliseconds":  339.1422359999997
+                               },
+                               {
+                                   "markerName":  "Input.V1.ProcessSamples",
+                                   "totalCallCount":  12010,
+                                   "averageRunTotalMilliseconds":  25.741673099999998,
+                                   "medianRunTotalMilliseconds":  25.825114,
+                                   "p95RunTotalMilliseconds":  27.200287399999995,
+                                   "maximumRunTotalMilliseconds":  27.423401
+                               }
+                           ]
+           },
+    "v2":  {
+               "version":  "V2",
+               "runCount":  10,
+               "averageMarkerTotalMilliseconds":  123.06337689999998,
+               "medianMarkerTotalMilliseconds":  122.81107699999996,
+               "p95MarkerTotalMilliseconds":  125.62126889999998,
+               "maximumMarkerTotalMilliseconds":  126.83426999999999,
+               "metrics":  [
+                               {
+                                   "markerName":  "Input.V2.AttackTick",
+                                   "totalCallCount":  6010,
+                                   "averageRunTotalMilliseconds":  15.666187099999999,
+                                   "medianRunTotalMilliseconds":  15.500072499999991,
+                                   "p95RunTotalMilliseconds":  16.535404100000027,
+                                   "maximumRunTotalMilliseconds":  16.58525600000003
+                               },
+                               {
+                                   "markerName":  "Input.V2.CompleteFrame",
+                                   "totalCallCount":  6000,
+                                   "averageRunTotalMilliseconds":  72.92813939999999,
+                                   "medianRunTotalMilliseconds":  72.95569650000002,
+                                   "p95RunTotalMilliseconds":  74.04970504999999,
+                                   "maximumRunTotalMilliseconds":  74.38713799999998
+                               },
+                               {
+                                   "markerName":  "Input.V2.ProcessSamples",
+                                   "totalCallCount":  12010,
+                                   "averageRunTotalMilliseconds":  34.46905039999999,
+                                   "medianRunTotalMilliseconds":  34.602508,
+                                   "p95RunTotalMilliseconds":  36.72151779999997,
+                                   "maximumRunTotalMilliseconds":  37.68041199999999
+                               }
+                           ]
+           },
+    "v1ToV2AverageMarkerTotalChangePercent":  -65.83492866873384,
+    "summary":  "[Input Batch Comparison] Completed | Warmups: 1 | Measured Runs Per Version: 10\n=== V1 ===\nMarker Total per Run | Avg: 360.2023 ms | Median: 361.2721 ms | P95: 364.5108 ms | Max: 364.8852 ms\n  - Input.V1.GestureUpdate | Calls: 5990 | Run Total Avg: 334.4606 ms | Median: 335.3859 ms | P95: 338.7566 ms | Max: 339.1422 ms\n  - Input.V1.ProcessSamples | Calls: 12010 | Run Total Avg: 25.7417 ms | Median: 25.8251 ms | P95: 27.2003 ms | Max: 27.4234 ms\n=== V2 ===\nMarker Total per Run | Avg: 123.0634 ms | Median: 122.8111 ms | P95: 125.6213 ms | Max: 126.8343 ms\n  - Input.V2.AttackTick | Calls: 6010 | Run Total Avg: 15.6662 ms | Median: 15.5001 ms | P95: 16.5354 ms | Max: 16.5853 ms\n  - Input.V2.CompleteFrame | Calls: 6000 | Run Total Avg: 72.9281 ms | Median: 72.9557 ms | P95: 74.0497 ms | Max: 74.3871 ms\n  - Input.V2.ProcessSamples | Calls: 12010 | Run Total Avg: 34.4691 ms | Median: 34.6025 ms | P95: 36.7215 ms | Max: 37.6804 ms\n=== V1 -\u003e V2 Average Marker Total ===\nV1: 360.2023 ms | V2: 123.0634 ms | Change: -65.83%"
+}
