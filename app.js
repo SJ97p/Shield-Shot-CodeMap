@@ -568,12 +568,19 @@ let graphBaseSize = { width: 760, height: 420 };
 const navStack = [];
 
 const els = {
+  layout: document.getElementById("layout"),
   tree: document.getElementById("tree"),
   treeSearch: document.getElementById("explorer-search"),
   title: document.getElementById("node-title"),
   summary: document.getElementById("node-summary"),
   graphWrap: document.getElementById("graph-wrap"),
   graph: document.getElementById("graph"),
+  benchmarkReport: document.getElementById("benchmark-report"),
+  detailGrid: document.getElementById("detail-grid"),
+  scriptSection: document.getElementById("script-section"),
+  evidenceSection: document.getElementById("evidence-section"),
+  codePanel: document.getElementById("code-panel"),
+  codeResizer: document.getElementById("code-resizer"),
   intent: document.getElementById("intent"),
   issue: document.getElementById("issue"),
   final: document.getElementById("final"),
@@ -691,10 +698,15 @@ async function selectNode(id, options = {}) {
   els.issue.textContent = node.issue || "";
   els.final.textContent = node.final || "";
   els.next.textContent = node.next || "";
+  const isBenchmarkReport = node.view === "benchmark-report" && node.report;
+  setBenchmarkMode(isBenchmarkReport);
+  if (isBenchmarkReport) {
+    renderBenchmarkReport(node.report);
+  }
   renderScripts(node);
   renderEvidence(node);
-  await renderGraph(node);
-  if (node.code && node.code.length) {
+  if (!isBenchmarkReport) await renderGraph(node);
+  if (!isBenchmarkReport && node.code && node.code.length) {
     await loadCode(node.code[0], node.code[0].focus);
   } else {
     currentCodeFiles = [];
@@ -703,6 +715,57 @@ async function selectNode(id, options = {}) {
     els.codePreview.innerHTML = "<code>이 노드는 구조 설명 중심입니다. Core Scripts에서 클래스를 선택하면 코드 스냅샷이 표시됩니다.</code>";
   }
   if (options.preserveScroll !== false) restoreScrollState(scrollState);
+}
+
+function setBenchmarkMode(enabled) {
+  els.layout.classList.toggle("benchmark-mode", enabled);
+  els.benchmarkReport.hidden = !enabled;
+  els.graphWrap.hidden = enabled;
+  els.detailGrid.hidden = enabled;
+  els.scriptSection.hidden = enabled;
+  els.evidenceSection.hidden = enabled;
+  document.querySelector(".zoom-controls").hidden = enabled;
+}
+
+function renderBenchmarkReport(report) {
+  const deviceCards = report.devices.map((device) => {
+    const ratio = Math.max(2, Math.min(100, device.v2.average / device.v1.average * 100));
+    return `<article class="benchmark-device">
+      <div class="benchmark-device-head">
+        <div><h4>${escapeHtml(device.name)}</h4><p>${escapeHtml(device.context)}</p></div>
+        <span class="benchmark-change">-${device.change.toFixed(2)}%</span>
+      </div>
+      <div class="benchmark-bar-row"><strong>V1</strong><div class="benchmark-bar-track"><div class="benchmark-bar" style="--bar-width:100%"></div></div><span class="benchmark-bar-value">${device.v1.average.toFixed(4)} ms</span></div>
+      <div class="benchmark-bar-row"><strong>V2</strong><div class="benchmark-bar-track"><div class="benchmark-bar v2" style="--bar-width:${ratio.toFixed(2)}%"></div></div><span class="benchmark-bar-value">${device.v2.average.toFixed(4)} ms</span></div>
+    </article>`;
+  }).join("");
+
+  const resultRows = report.devices.map((device) => `<tr>
+    <td>${escapeHtml(device.name)}</td><td>${device.v1.average.toFixed(4)}</td><td>${device.v2.average.toFixed(4)}</td>
+    <td>${device.v1.p95.toFixed(4)} / ${device.v2.p95.toFixed(4)}</td><td>${device.v1.max.toFixed(4)} / ${device.v2.max.toFixed(4)}</td>
+    <td class="benchmark-positive">-${device.change.toFixed(2)}%</td>
+  </tr>`).join("");
+
+  const markerRows = report.devices.flatMap((device) => device.markers.map((marker) => `<tr>
+    <td>${escapeHtml(device.name)}</td><td>${escapeHtml(marker.version)}</td><td>${escapeHtml(marker.name)}</td><td>${marker.calls.toLocaleString()}</td><td>${marker.average.toFixed(4)} ms</td>
+  </tr>`)).join("");
+
+  const steps = report.steps.map((step, index) => `<div class="benchmark-step"><strong>0${index + 1}. ${escapeHtml(step.title)}</strong><span>${escapeHtml(step.description)}</span></div>`).join("");
+  const conditions = report.conditions.map((condition) => `<span class="benchmark-condition">${escapeHtml(condition)}</span>`).join("");
+  const links = report.links.map((link) => `<a href="${escapeHtml(link.href)}" target="_blank" rel="noreferrer">${escapeHtml(link.label)}</a>`).join("");
+
+  els.benchmarkReport.innerHTML = `
+    <header class="benchmark-hero"><p class="benchmark-kicker">Measured Performance Report</p><h2>${escapeHtml(report.headline)}</h2><p>${escapeHtml(report.summary)}</p></header>
+    <section class="benchmark-kpis">
+      <article class="benchmark-kpi"><strong>-76.36%</strong><span>Windows Development Build<br>Input Marker 누적 비용</span></article>
+      <article class="benchmark-kpi"><strong>-65.83%</strong><span>Galaxy S23+ 실제 기기<br>Input Marker 누적 비용</span></article>
+      <article class="benchmark-kpi"><strong>12,010</strong><span>V1/V2 동일<br>ProcessSamples 호출 수</span></article>
+      <article class="benchmark-kpi"><strong>10 × 10s</strong><span>버전별 측정 횟수 ×<br>각 실행 시간</span></article>
+    </section>
+    <section class="benchmark-section"><h3>V1 / V2 결과 비교</h3><p class="benchmark-section-lead">각 환경에서 V1 평균을 100%로 두고 V2의 상대적인 Marker 비용을 표시했습니다.</p><div class="benchmark-device-grid">${deviceCards}</div></section>
+    <section class="benchmark-section"><h3>측정 조건과 실행 절차</h3><p class="benchmark-section-lead">사람의 손 입력 대신 동일한 선형 드래그 샘플을 양쪽 구현 경계에 주입해 구조 차이만 비교했습니다.</p><div class="benchmark-steps">${steps}</div><div class="benchmark-conditions">${conditions}</div></section>
+    <section class="benchmark-section"><h3>종합 결과표</h3><div class="benchmark-table-wrap"><table class="benchmark-table"><thead><tr><th>환경</th><th>V1 평균(ms)</th><th>V2 평균(ms)</th><th>P95 V1 / V2</th><th>Max V1 / V2</th><th>평균 감소율</th></tr></thead><tbody>${resultRows}</tbody></table></div></section>
+    <section class="benchmark-section"><h3>Marker별 비용</h3><p class="benchmark-section-lead">V2의 ProcessSamples 비용만 보면 증가했지만, 반복 GestureUpdate 전파를 대체하면서 전체 누적 비용이 감소했습니다.</p><div class="benchmark-table-wrap"><table class="benchmark-table"><thead><tr><th>환경</th><th>버전</th><th>Profiler Marker</th><th>Calls</th><th>Run Total 평균</th></tr></thead><tbody>${markerRows}</tbody></table></div><div class="benchmark-note">${escapeHtml(report.interpretation)}</div><div class="benchmark-links">${links}</div></section>`;
 }
 
 function renderScripts(node) {
@@ -974,6 +1037,50 @@ els.treeSearch.addEventListener("input", (event) => {
   treeSearchQuery = event.target.value;
   renderTree();
 });
+
+const defaultCodePanelWidth = 460;
+
+function setCodePanelWidth(width) {
+  const maximum = Math.min(820, window.innerWidth * 0.62);
+  const nextWidth = Math.max(320, Math.min(maximum, width));
+  els.layout.style.setProperty("--code-panel-width", `${Math.round(nextWidth)}px`);
+  els.codeResizer.setAttribute("aria-valuenow", String(Math.round(nextWidth)));
+}
+
+els.codeResizer.addEventListener("pointerdown", (event) => {
+  if (!window.matchMedia("(min-width: 1281px)").matches) return;
+  els.layout.classList.add("is-resizing");
+  els.codeResizer.setPointerCapture(event.pointerId);
+});
+
+els.codeResizer.addEventListener("pointermove", (event) => {
+  if (!els.layout.classList.contains("is-resizing")) return;
+  setCodePanelWidth(window.innerWidth - event.clientX);
+});
+
+function finishCodePanelResize(event) {
+  if (!els.layout.classList.contains("is-resizing")) return;
+  els.layout.classList.remove("is-resizing");
+  if (els.codeResizer.hasPointerCapture(event.pointerId)) {
+    els.codeResizer.releasePointerCapture(event.pointerId);
+  }
+}
+
+els.codeResizer.addEventListener("pointerup", finishCodePanelResize);
+els.codeResizer.addEventListener("pointercancel", finishCodePanelResize);
+els.codeResizer.addEventListener("dblclick", () => setCodePanelWidth(defaultCodePanelWidth));
+els.codeResizer.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight" && event.key !== "Home") return;
+  event.preventDefault();
+  if (event.key === "Home") {
+    setCodePanelWidth(defaultCodePanelWidth);
+    return;
+  }
+  const current = parseFloat(getComputedStyle(els.layout).getPropertyValue("--code-panel-width")) || defaultCodePanelWidth;
+  setCodePanelWidth(current + (event.key === "ArrowLeft" ? 24 : -24));
+});
+
+setCodePanelWidth(defaultCodePanelWidth);
 
 window.selectNode = selectNode;
 renderTree();

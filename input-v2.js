@@ -49,6 +49,7 @@ Object.assign(nodes, {
 
   inputBenchmark: system({
     title: "Deterministic Input Benchmark",
+    view: "benchmark-report",
     summary: "V1/V2에 동일한 10초 선형 드래그를 주입하고 워밍업과 10회 반복 측정으로 평균, 중앙값, P95와 최댓값을 수집했습니다.",
     intent: "사람의 드래그는 속도와 샘플 수가 매번 달라지므로 성능 개선의 근거가 될 수 없습니다. 동일 입력량과 동일 실행 조건을 자동으로 재현하고 Development Build와 실제 Android 기기에서 검증했습니다.",
     issue: "초기 측정에서는 Recorder 순환 버퍼 용량과 무제한 FPS 때문에 오래된 샘플이 유실되어 개선율이 과장될 수 있었습니다. Editor 단일 실행은 초기화와 프레임 변동의 영향도 컸습니다.",
@@ -61,6 +62,52 @@ Object.assign(nodes, {
       code("Performance/InputComparison/InputProfilerRecorderSession.cs", "Start", ["Start", "Stop"]),
       code("Performance/InputComparison/InputComparisonBuildRunner.cs", "Start", ["Start", "RunBenchmark"]),
     ],
+    report: {
+      headline: "동일한 입력을 처리했을 때 V2는 얼마나 가벼워졌는가?",
+      summary: "V1과 V2에 같은 10초 선형 드래그를 반복 주입하고 ProfilerRecorder로 Input Marker의 누적 실행 비용을 측정했습니다. Editor의 체감 비교가 아니라 Windows Development Build와 Galaxy S23+ 실제 기기 결과를 핵심 근거로 사용했습니다.",
+      steps: [
+        { title: "시나리오 생성", description: "10초 동안 초당 120개의 동일한 선형 드래그 샘플을 생성" },
+        { title: "V1 워밍업", description: "초기화와 JIT 영향을 줄이기 위해 결과에서 제외할 1회 실행" },
+        { title: "V1 10회", description: "동일 샘플을 V1 Adapter에 주입하고 Marker 통계를 기록" },
+        { title: "V2 10회", description: "같은 샘플을 V2 경계에 주입해 같은 조건으로 측정" },
+        { title: "JSON 저장", description: "기기 정보와 평균·중앙값·P95·최댓값을 파일로 보존" },
+      ],
+      conditions: ["60 FPS", "VSync 0", "Warmup 1회", "Measured 10회", "10초 / Run", "120 Samples/s", "ProcessSamples 12,010 Calls", "Development Build"],
+      devices: [
+        {
+          name: "Windows Development Build", context: "Ryzen 9 9950X · Unity 6000.3.6f1",
+          change: 76.3569,
+          v1: { average: 100.1458, median: 100.2809, p95: 102.2201, max: 102.3660 },
+          v2: { average: 23.6776, median: 23.6906, p95: 24.4077, max: 24.7680 },
+          markers: [
+            { version: "V1", name: "Input.V1.GestureUpdate", calls: 5990, average: 95.5710 },
+            { version: "V1", name: "Input.V1.ProcessSamples", calls: 12010, average: 4.5748 },
+            { version: "V2", name: "Input.V2.AttackTick", calls: 6011, average: 2.9677 },
+            { version: "V2", name: "Input.V2.CompleteFrame", calls: 6001, average: 14.4786 },
+            { version: "V2", name: "Input.V2.ProcessSamples", calls: 12010, average: 6.2313 },
+          ],
+        },
+        {
+          name: "Galaxy S23+", context: "Android 15 · Adreno 740 · Unity 6000.3.6f1",
+          change: 65.8349,
+          v1: { average: 360.2023, median: 361.2721, p95: 364.5108, max: 364.8852 },
+          v2: { average: 123.0634, median: 122.8111, p95: 125.6213, max: 126.8343 },
+          markers: [
+            { version: "V1", name: "Input.V1.GestureUpdate", calls: 5990, average: 334.4606 },
+            { version: "V1", name: "Input.V1.ProcessSamples", calls: 12010, average: 25.7417 },
+            { version: "V2", name: "Input.V2.AttackTick", calls: 6010, average: 15.6662 },
+            { version: "V2", name: "Input.V2.CompleteFrame", calls: 6000, average: 72.9281 },
+            { version: "V2", name: "Input.V2.ProcessSamples", calls: 12010, average: 34.4691 },
+          ],
+        },
+      ],
+      interpretation: "이 결과는 게임 전체 Frame Time이나 FPS가 65~76% 개선되었다는 의미가 아닙니다. 동일 시나리오에서 측정 대상으로 지정한 Input Marker의 누적 실행 비용이 감소했다는 뜻입니다. Galaxy S23+에서 V2 ProcessSamples 자체는 V1보다 약 33.9% 증가했지만, 이후 단계의 반복 갱신 비용을 줄여 전체 Marker 합계는 65.83% 감소했습니다.",
+      links: [
+        { label: "Windows 원본 JSON", href: "docs/data/input-benchmark/windows-development-build.json" },
+        { label: "Galaxy S23+ 원본 JSON", href: "docs/data/input-benchmark/galaxy-s23-plus.json" },
+        { label: "상세 측정 문서", href: "docs/systems/input-system-v2-benchmark.md" },
+      ],
+    },
     graph: `flowchart LR
       scenario["10 sec / 120 samples per sec"] --> v1warm["V1 Warmup"]
       v1warm --> v1runs["V1 x 10"]
