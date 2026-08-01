@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shield & Shot Code Map</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260801-explorer" />
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js"></script>
 </head>
 <body>
@@ -24,6 +24,10 @@
     <aside class="sidebar">
       <div class="panel-head">
         <h2>Explorer</h2>
+        <label class="explorer-search" for="explorer-search">
+          <span class="sr-only">모듈 검색</span>
+          <input id="explorer-search" type="search" placeholder="모듈 검색..." autocomplete="off" />
+        </label>
       </div>
       <div id="tree" class="tree"></div>
     </aside>
@@ -101,7 +105,7 @@
     <p id="modal-caption"></p>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260801-explorer2"></script>
   <script src="input-v2-source-cache.js"></script>
   <script src="input-v2.js"></script>
 </body>

@@ -111,6 +111,15 @@ h3 { margin-bottom: 8px; font-size: 16px; color: var(--accent); }
   background: var(--panel);
 }
 
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .panel-head {
   padding: 16px;
   border-bottom: 1px solid var(--line);
@@ -123,16 +132,75 @@ h3 { margin-bottom: 8px; font-size: 16px; color: var(--accent); }
   line-height: 1.45;
 }
 
-.tree { padding: 12px; }
-.tree-group { margin-bottom: 16px; }
+.explorer-search {
+  display: block;
+  margin-top: 12px;
+}
+
+.explorer-search input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  outline: none;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.explorer-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.explorer-search input::placeholder { color: var(--muted); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tree {
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.tree-group { margin-bottom: 6px; }
 .tree-title {
-  padding: 8px 8px 6px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--muted);
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0;
+  text-align: left;
+  cursor: pointer;
 }
+
+.tree-title:hover { background: var(--panel-2); color: var(--text); }
+.tree-title::before { content: "▸"; width: 12px; color: var(--accent); }
+.tree-title[aria-expanded="true"]::before { content: "▾"; }
+.tree-group-items[hidden] { display: none; }
+.tree-empty { padding: 16px 8px; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
 .tree-item {
   width: 100%;
@@ -399,6 +467,8 @@ h3 { margin-bottom: 8px; font-size: 16px; color: var(--accent); }
   .topbar { align-items: flex-start; flex-direction: column; }
   .layout { display: block; }
   .sidebar, .main-panel, .code-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+  .sidebar { position: static; height: auto; max-height: none; }
+  .tree { max-height: 420px; }
   .detail-grid, .script-list, .evidence-grid { grid-template-columns: 1fr; }
   .graph-wrap { min-height: 360px; margin: 12px; }
 }

@@ -558,6 +558,9 @@ const treeGroups = [
   { title: "Weapon / Shield / Aim", ids: ["NetworkWeaponManager", "NetworkShieldSpawnSetup", "NetworkShieldActor", "NetworkShieldColliderDetector", "AimLineRenderer", "IProjectileAimPredictionProvider", "WeaponBase"] },
 ];
 
+const expandedTreeGroups = new Set();
+let treeSearchQuery = "";
+
 let currentNodeId = "overview";
 let currentCodeFiles = [];
 let graphScale = 1;
@@ -566,6 +569,7 @@ const navStack = [];
 
 const els = {
   tree: document.getElementById("tree"),
+  treeSearch: document.getElementById("explorer-search"),
   title: document.getElementById("node-title"),
   summary: document.getElementById("node-summary"),
   graphWrap: document.getElementById("graph-wrap"),
@@ -610,28 +614,66 @@ ${relations}`;
 
 function renderTree() {
   els.tree.innerHTML = "";
+  const query = treeSearchQuery.trim().toLocaleLowerCase("ko-KR");
+  let visibleItemCount = 0;
+
   treeGroups.forEach((group) => {
+    const groupMatches = group.title.toLocaleLowerCase("ko-KR").includes(query);
+    const visibleIds = group.ids.filter((id) => {
+      const node = nodes[id];
+      if (!node) return false;
+      return !query || groupMatches || node.title.toLocaleLowerCase("ko-KR").includes(query);
+    });
+
+    if (visibleIds.length === 0) return;
+
     const wrapper = document.createElement("div");
     wrapper.className = "tree-group";
-    const title = document.createElement("div");
+    const title = document.createElement("button");
+    title.type = "button";
     title.className = "tree-title";
     title.textContent = group.title;
+    title.setAttribute("aria-label", group.title);
+    const isExpanded = Boolean(query) || expandedTreeGroups.has(group.title);
+    title.setAttribute("aria-expanded", String(isExpanded));
     wrapper.appendChild(title);
 
-    group.ids.forEach((id) => {
+    const items = document.createElement("div");
+    items.className = "tree-group-items";
+    items.hidden = !isExpanded;
+
+    title.addEventListener("click", () => {
+      if (expandedTreeGroups.has(group.title)) {
+        expandedTreeGroups.delete(group.title);
+      } else {
+        expandedTreeGroups.add(group.title);
+      }
+      renderTree();
+    });
+
+    visibleIds.forEach((id) => {
       const node = nodes[id];
-      if (!node) return;
       const button = document.createElement("button");
       button.type = "button";
       button.className = `tree-item ${node.kind === "class" ? "child" : ""}`;
       button.dataset.id = id;
       button.textContent = node.title;
       button.addEventListener("click", () => selectNode(id));
-      wrapper.appendChild(button);
+      if (id === currentNodeId) button.classList.add("active");
+      items.appendChild(button);
+      visibleItemCount += 1;
     });
 
+    wrapper.appendChild(items);
     els.tree.appendChild(wrapper);
   });
+
+  if (visibleItemCount === 0) {
+    const empty = document.createElement("p");
+    empty.className = "tree-empty";
+    empty.textContent = "일치하는 모듈이 없습니다.";
+    els.tree.appendChild(empty);
+  }
 }
 
 async function selectNode(id, options = {}) {
@@ -927,6 +969,11 @@ document.getElementById("theme-toggle").addEventListener("click", () => {
 });
 
 document.getElementById("modal-close").addEventListener("click", () => document.getElementById("media-modal").close());
+
+els.treeSearch.addEventListener("input", (event) => {
+  treeSearchQuery = event.target.value;
+  renderTree();
+});
 
 window.selectNode = selectNode;
 renderTree();
