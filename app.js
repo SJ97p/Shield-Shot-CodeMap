@@ -27,7 +27,7 @@ function cls(data) {
 
 const nodes = {
   overview: system({
-    title: "Gameplay / PvP System Map",
+    title: "게임플레이·PvP 시스템 구조",
     summary: "Shield & Shot에서 담당한 게임 기획, PM, 전투/네트워크/게임플레이 시스템 설계와 통합 범위를 시스템 단위로 탐색합니다.",
     intent: "기능 목록보다 먼저 요구사항과 책임 경계를 정리하고, Projectile augment, ElementField, PvP network combat이 서로 다른 구현처럼 흩어지지 않도록 공통 데이터 흐름을 설계했습니다.",
     issue: "프로젝트가 진행 중이라 구현 속도와 병합 부담이 컸고, 로컬 전투와 Fusion PvP lifecycle 차이 때문에 병합 후 기능이 깨지는 상황이 반복되었습니다.",
@@ -37,13 +37,13 @@ const nodes = {
     evidence: [evidence.augment, evidence.gridScene, evidence.weaponShield, evidence.pvpFeedback],
     code: [],
     graph: `flowchart TD
-      req["Game Design / PM Requirements"]
-      augment["Projectile Behavior & Augment"]
-      field["ElementField Grid"]
-      pvp["PvP Network Combat"]
-      aim["Aim Prediction"]
-      spawn["Network Weapon / Shield"]
-      hit["Hit / VFX / Popup Sync"]
+      req["게임 기획·PM 요구사항"]
+      augment["투사체 행동·증강"]
+      field["속성 필드 그리드"]
+      pvp["PvP 네트워크 전투"]
+      aim["조준 예측"]
+      spawn["네트워크 무기·방패 생성"]
+      hit["피격·VFX·팝업 동기화"]
 
       req --> augment
       req --> field
@@ -56,7 +56,7 @@ const nodes = {
   }),
 
   augment: system({
-    title: "Projectile Behavior & Augment Injection",
+    title: "투사체 행동·증강 주입 시스템",
     summary: "투사체 효과를 if문 누적이 아니라 behavior 주입과 우선순위 기반 실행 구조로 확장했습니다.",
     intent: "증강, 반사, 관통, 분열, 속성 효과가 계속 추가될 것을 전제로 Projectile core를 직접 수정하지 않고 확장 가능한 구조가 필요했습니다.",
     issue: "단일 체인 방식으로 시작하면 즉시 적용되는 증강, 다음 탄 1회성 효과, 충돌 중 필드 효과, 네트워크 payload 복구가 서로 다른 생명주기를 가져 우선순위 정리가 어려웠습니다.",
@@ -88,7 +88,7 @@ const nodes = {
   }),
 
   field: system({
-    title: "ElementField Grid & Terrain Reaction",
+    title: "속성 필드·지형 반응 시스템",
     summary: "GameObject cell 방식에서 데이터 grid 방식으로 전환해 속성 장판, terrain reaction, arena 좌표계를 통합했습니다.",
     intent: "Fire/Wind/Ice 효과가 단순 VFX가 아니라 전투 규칙과 terrain 상태에 영향을 주는 시스템이 되도록 arena 좌표계를 기준으로 설계했습니다.",
     issue: "cell마다 GameObject/Collider를 유지하면 비용이 커지고, pivot 기준 판정 때문에 모서리/경계에서 어긋남이 발생했습니다.",
@@ -119,7 +119,7 @@ const nodes = {
   }),
 
   pvpProjectile: system({
-    title: "PvP Network Projectile Sync",
+    title: "PvP 네트워크 투사체 동기화",
     summary: "로컬 projectile과 다른 네트워크 lifecycle에서도 증강, damage, hit, VFX가 동작하도록 payload와 RPC 경로를 분리했습니다.",
     intent: "로컬 전투의 확장 구조를 Fusion PvP로 그대로 가져오되, InputAuthority/StateAuthority 기준으로 발사, payload, spawn, feedback 책임을 나누었습니다.",
     issue: "네트워크 projectile에는 local context와 SO 직접 참조를 그대로 넘길 수 없고, projectile despawn 이후 VFX 지연 출력도 끊기는 문제가 있었습니다.",
@@ -148,7 +148,7 @@ const nodes = {
   }),
 
   aimPrediction: system({
-    title: "Aim Line / Projectile Alignment",
+    title: "조준선·투사체 판정 정렬",
     summary: "Aim line과 실제 network projectile의 시작점, collision radius, wall layer 기준을 통일했습니다.",
     intent: "조준선은 단순 시각 보조가 아니라 실제 판정을 예측하는 기준이어야 하므로 projectile spawn origin/radius와 같은 값을 공유하도록 했습니다.",
     issue: "초기에는 방향 보간 문제처럼 보였지만 실제 원인은 network projectile spawn offset, prefab radius, PvpWall layer 감지 차이였습니다.",
@@ -178,7 +178,7 @@ const nodes = {
   }),
 
   hitFeedback: system({
-    title: "PvP Hit Detection / VFX / Damage Popup",
+    title: "PvP 피격·VFX·데미지 팝업 동기화",
     summary: "PvP hit이 안 되던 문제를 hitbox/layer 단계에서 복구하고 VFX와 damage popup을 모든 peer에 동기화했습니다.",
     intent: "네트워크 전투에서는 hit 판정, damage 적용, popup, VFX가 같은 사건처럼 보여야 하지만 실제로는 책임 단계가 다릅니다.",
     issue: "투사체가 대상을 통과했지만 target candidate 로그가 없었고, 원인은 damage logic이 아니라 player hitbox localPosition override와 자식 collider layer 오염이었습니다.",
@@ -207,7 +207,7 @@ const nodes = {
   }),
 
   networkSpawn: system({
-    title: "Network Weapon & Shield Spawn",
+    title: "네트워크 무기·방패 생성 시스템",
     summary: "로비 선택 데이터가 PvP 클라이언트에서 동일한 weapon/shield prefab으로 복구되도록 ID 기반 spawn 흐름을 구성했습니다.",
     intent: "각 플레이어가 선택한 무기/방패가 local UI 상태에만 머무르지 않고 network object lifecycle에서 재현되어야 했습니다.",
     issue: "네트워크 씬에서는 기존 local WeaponManager/ShieldManager 흐름을 그대로 쓰기 어렵고 authority, spawn order, owner binding을 명확히 나누어야 했습니다.",
@@ -551,11 +551,11 @@ Object.assign(nodes, {
 });
 
 const treeGroups = [
-  { title: "Systems", ids: ["overview", "augment", "field", "pvpProjectile", "aimPrediction", "hitFeedback", "networkSpawn"] },
-  { title: "Projectile / Augment", ids: ["ProjectileBehaviorSO", "ProjectileShooter", "ProjectileBase", "ProjectileBehaviorRegistry", "PvpProjectileAugmentPayload", "PvpProjectileAugmentEntry"] },
-  { title: "ElementField / Arena", ids: ["ElementFieldGrid", "ElementFieldCellData", "ElementReactionResolver", "ElementFieldEffectSystem", "ElementFieldVisualController", "ArenaTerrainPainter", "ArenaRandomReflectWallBuilder"] },
-  { title: "PvP Network", ids: ["NetworkProjectileFireHandler", "NetworkProjectileActor", "PvpWeaponActorIdentity", "PvpWeaponHitTarget", "PvpWeaponHealth", "PvpMatchStateController"] },
-  { title: "Weapon / Shield / Aim", ids: ["NetworkWeaponManager", "NetworkShieldSpawnSetup", "NetworkShieldActor", "NetworkShieldColliderDetector", "AimLineRenderer", "IProjectileAimPredictionProvider", "WeaponBase"] },
+  { title: "핵심 시스템", ids: ["overview", "augment", "field", "pvpProjectile", "aimPrediction", "hitFeedback", "networkSpawn"] },
+  { title: "투사체·증강 클래스", ids: ["ProjectileBehaviorSO", "ProjectileShooter", "ProjectileBase", "ProjectileBehaviorRegistry", "PvpProjectileAugmentPayload", "PvpProjectileAugmentEntry"] },
+  { title: "속성 필드·아레나 클래스", ids: ["ElementFieldGrid", "ElementFieldCellData", "ElementReactionResolver", "ElementFieldEffectSystem", "ElementFieldVisualController", "ArenaTerrainPainter", "ArenaRandomReflectWallBuilder"] },
+  { title: "PvP 네트워크 클래스", ids: ["NetworkProjectileFireHandler", "NetworkProjectileActor", "PvpWeaponActorIdentity", "PvpWeaponHitTarget", "PvpWeaponHealth", "PvpMatchStateController"] },
+  { title: "무기·방패·조준 클래스", ids: ["NetworkWeaponManager", "NetworkShieldSpawnSetup", "NetworkShieldActor", "NetworkShieldColliderDetector", "AimLineRenderer", "IProjectileAimPredictionProvider", "WeaponBase"] },
 ];
 
 const expandedTreeGroups = new Set();

@@ -1,6 +1,6 @@
 Object.assign(nodes, {
   inputV2: system({
-    title: "Input System V2 Refactoring",
+    title: "입력 시스템 V2 리팩터링",
     summary: "프레임 중심으로 반복 전파되던 V1 입력을 Source, Filter, Router, Gesture, Interpreter, Adapter 책임으로 분리하고 실제 기기에서 검증했습니다.",
     intent: "활 조작의 굼뜬 반응과 드래그 중 과도한 갱신을 단순 Update 최적화 문제가 아니라 입력 빈도가 UI·VFX·네트워크까지 전파될 수 있는 구조 문제로 보았습니다. 기존 V1은 기준선으로 보존하고 V2를 병렬 구현해 기능과 수치를 함께 비교했습니다.",
     issue: "V1은 InputProvider → TouchRouter → GestureAnalyzer → PlayerInputReceiver → Weapon 흐름으로 나뉘어 있었지만 수집, 제스처 갱신과 게임플레이 전달 주기가 프레임 흐름에 묶여 있었습니다. 작은 이동과 유지 상태도 GestureUpdate를 반복 실행했고, 특정 정책을 바꾸면 여러 계층을 함께 확인해야 했습니다.",
@@ -23,7 +23,7 @@ Object.assign(nodes, {
   }),
 
   inputV1VsV2: system({
-    title: "V1 to V2 Design Decision",
+    title: "입력 시스템 V1·V2 설계 비교",
     summary: "기존 코드를 덮어쓰지 않고 V1을 기준선으로 남긴 채 V2를 별도 구현한 판단과 책임 재배치 과정입니다.",
     intent: "리팩터링 전 동작과 수치를 잃지 않고 기능 회귀, 입력량과 처리 비용을 직접 비교하려 했습니다. 최적화라는 결론을 코드 인상에 의존하지 않고 동일 입력으로 증명하는 것이 목표였습니다.",
     issue: "V1의 클래스가 하나로 합쳐진 것은 아니었지만 서로 다른 변경 이유가 프레임 이벤트 체인에 묶여 있었습니다. 입력 API, UI 차단, 영역 설정, 제스처 상태, 차징과 무기 호출이 독립적으로 교체하거나 시험하기 어려웠습니다.",
@@ -48,7 +48,7 @@ Object.assign(nodes, {
   }),
 
   inputBenchmark: system({
-    title: "Deterministic Input Benchmark",
+    title: "결정론적 입력 성능 검증",
     view: "benchmark-report",
     summary: "V1/V2에 동일한 10초 선형 드래그를 주입하고 워밍업과 10회 반복 측정으로 평균, 중앙값, P95와 최댓값을 수집했습니다.",
     intent: "사람의 드래그는 속도와 샘플 수가 매번 달라지므로 성능 개선의 근거가 될 수 없습니다. 동일 입력량과 동일 실행 조건을 자동으로 재현하고 Development Build와 실제 Android 기기에서 검증했습니다.",
@@ -317,9 +317,9 @@ Object.assign(nodes, {
 });
 
 treeGroups.push(
-  { title: "Input System V2", ids: ["inputV2", "inputV1VsV2", "inputBenchmark"] },
-  { title: "Input Pipeline", ids: ["UnityPointerInputDriver", "PointerMovementThresholdFilter", "PointerMoveCoalescingSink", "CombatPointerRouter", "PointerGestureTracker", "AttackGestureInterpreter", "DefenseGestureInterpreter", "WeaponAttackInputAdapter", "ShieldDefenseInputAdapter", "InputSystemV2RuntimeBehaviour"] },
-  { title: "Input Benchmark", ids: ["LegacyInputProvider", "LegacyGestureAnalyzer", "BenchmarkPointerSequencePlayer", "V1BenchmarkInputAdapter", "V2BenchmarkInputAdapter", "InputProfilerRecorderSession", "InputComparisonBatchStatistics", "InputComparisonBuildRunner"] },
+  { title: "입력 시스템 V2", ids: ["inputV2", "inputV1VsV2", "inputBenchmark"] },
+  { title: "입력 파이프라인 클래스", ids: ["UnityPointerInputDriver", "PointerMovementThresholdFilter", "PointerMoveCoalescingSink", "CombatPointerRouter", "PointerGestureTracker", "AttackGestureInterpreter", "DefenseGestureInterpreter", "WeaponAttackInputAdapter", "ShieldDefenseInputAdapter", "InputSystemV2RuntimeBehaviour"] },
+  { title: "입력 성능 검증 클래스", ids: ["LegacyInputProvider", "LegacyGestureAnalyzer", "BenchmarkPointerSequencePlayer", "V1BenchmarkInputAdapter", "V2BenchmarkInputAdapter", "InputProfilerRecorderSession", "InputComparisonBatchStatistics", "InputComparisonBuildRunner"] },
 );
 
 renderTree();
