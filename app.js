@@ -58,9 +58,9 @@ const nodes = {
   augment: system({
     title: "투사체 행동·증강 주입 시스템",
     summary: "투사체 효과를 if문 누적이 아니라 behavior 주입과 우선순위 기반 실행 구조로 확장했습니다.",
-    intent: "증강, 반사, 관통, 분열, 속성 효과가 계속 추가될 것을 전제로 Projectile core를 직접 수정하지 않고 확장 가능한 구조가 필요했습니다.",
-    issue: "단일 체인 방식으로 시작하면 즉시 적용되는 증강, 다음 탄 1회성 효과, 충돌 중 필드 효과, 네트워크 payload 복구가 서로 다른 생명주기를 가져 우선순위 정리가 어려웠습니다.",
-    final: "hit/collision/movement behavior를 분리하고 PlayerStatus -> ProjectileShooter -> ProjectileBase 흐름으로 주입합니다. PvP에서는 behavior code/level payload를 Registry가 runtime behavior로 복구합니다.",
+    intent: "랜덤 증강 조합이 매 라운드 다른 전투 경험을 만들 수 있도록, 반사·관통·분열·속성 효과를 Projectile core 수정 없이 조립할 구조가 필요했습니다.",
+    issue: "분열과 난반사가 함께 있을 때 실행 순서에 따라 자식 화살에 다음 효과가 적용될 수도, 적용되지 않아야 할 수도 있었습니다. 즉시 적용 증강과 별도 스킬, 충돌 중 필드 효과도 생명주기가 달랐습니다.",
+    final: "hit/collision/movement behavior를 분리하고 PlayerStatus -> ProjectileShooter -> ProjectileBase 흐름으로 주입합니다. priority로 실행 순서를, inherit으로 자식 화살 전파 여부를 제어합니다. PvP에서는 behavior code/level payload를 Registry가 runtime behavior로 복구합니다.",
     next: "공개 문서에서는 우선순위 policy와 payload 버전 정책을 더 명시적으로 분리하면 확장 포인트가 더 선명해집니다.",
     classes: ["ProjectileBehaviorSO", "ProjectileShooter", "ProjectileBase", "ProjectileBehaviorRegistry", "PvpProjectileAugmentPayload", "PvpProjectileAugmentEntry"],
     evidence: [evidence.augment],
@@ -89,9 +89,9 @@ const nodes = {
 
   field: system({
     title: "속성 필드·지형 반응 시스템",
-    summary: "GameObject cell 방식에서 데이터 grid 방식으로 전환해 속성 장판, terrain reaction, arena 좌표계를 통합했습니다.",
+    summary: "전장 모든 셀을 GameObject/Collider로 유지하지 않고 데이터 grid로 관리해 속성 장판, terrain reaction, arena 좌표계를 통합했습니다.",
     intent: "Fire/Wind/Ice 효과가 단순 VFX가 아니라 전투 규칙과 terrain 상태에 영향을 주는 시스템이 되도록 arena 좌표계를 기준으로 설계했습니다.",
-    issue: "cell마다 GameObject/Collider를 유지하면 비용이 커지고, pivot 기준 판정 때문에 모서리/경계에서 어긋남이 발생했습니다.",
+    issue: "전장 모든 cell마다 GameObject/Collider를 유지하면 필드 상태 관리 비용이 커지고, pivot 기준 판정 때문에 모서리/경계에서 어긋남이 발생했습니다. 화살·몬스터·벽의 충돌 Collider를 없앤 것은 아닙니다.",
     final: "ElementFieldCellData[,]를 중심으로 Paint/PaintCircle, terrain state, reaction resolver, visual controller, effect system을 분리했습니다.",
     next: "Active cell network sync는 보류 상태입니다. PvP에서 cell state가 직접 전투 판정 데이터가 되면 network state로 올릴 예정입니다.",
     classes: ["ElementFieldGrid", "ElementFieldCellData", "ElementReactionResolver", "ElementFieldEffectSystem", "ElementFieldVisualController", "ArenaTerrainPainter", "ArenaRandomReflectWallBuilder"],
@@ -120,10 +120,10 @@ const nodes = {
 
   pvpProjectile: system({
     title: "PvP 네트워크 투사체 동기화",
-    summary: "로컬 projectile과 다른 네트워크 lifecycle에서도 증강, damage, hit, VFX가 동작하도록 payload와 RPC 경로를 분리했습니다.",
+    summary: "로컬 projectile과 다른 네트워크 lifecycle에서도 증강·damage·hit와 팀 제작 VFX가 정상적으로 동작하도록 payload와 RPC 경로를 연결했습니다.",
     intent: "로컬 전투의 확장 구조를 Fusion PvP로 그대로 가져오되, InputAuthority/StateAuthority 기준으로 발사, payload, spawn, feedback 책임을 나누었습니다.",
     issue: "네트워크 projectile에는 local context와 SO 직접 참조를 그대로 넘길 수 없고, projectile despawn 이후 VFX 지연 출력도 끊기는 문제가 있었습니다.",
-    final: "NetworkProjectileFireHandler가 payload를 만들고 Runner.Spawn으로 생성합니다. Registry가 code/level을 runtime behavior로 복구하고 NetworkProjectileActor가 hit/collision event를 RPC로 broadcast합니다.",
+    final: "NetworkProjectileFireHandler가 payload를 만들고 Runner.Spawn으로 생성합니다. Registry가 code/level을 runtime behavior로 복구하고 NetworkProjectileActor가 hit/collision event를 RPC로 broadcast합니다. 기존 팀 VFX·피드백 요소도 이 lifecycle에서 정상 출력되는지 통합 검증했습니다.",
     next: "Wind/Ice network visual full sync는 기반 마련 상태이며 proxy visual 최종 검증이 남아 있습니다.",
     classes: ["NetworkProjectileFireHandler", "NetworkProjectileActor", "PvpProjectileAugmentPayload", "PvpProjectileAugmentEntry", "ProjectileBehaviorRegistry"],
     evidence: [evidence.pvpFeedback, evidence.weaponShield],
@@ -312,7 +312,7 @@ Object.assign(nodes, {
     title: "ElementFieldGrid",
     summary: "Arena 위 속성 필드 상태를 ElementFieldCellData 배열로 관리하는 중심 클래스입니다.",
     intent: "시각 object가 아니라 데이터 grid가 전투 판정과 terrain 반응의 기준이 되도록 설계했습니다.",
-    issue: "GameObject cell 방식은 비용과 좌표 오차가 컸고 네트워크 확장에도 불리했습니다.",
+    issue: "전장 모든 셀을 GameObject/Collider로 유지하면 상태 관리 비용과 좌표 기준의 복잡도가 커졌습니다. 화살·몬스터·벽 충돌 Collider를 없앤 구조는 아닙니다.",
     final: "Paint/PaintCircle/PaintCell과 TickActiveCells로 필드 상태를 갱신합니다.",
     next: "Active cell network sync가 들어오면 delta 전송 기준을 이 클래스에서 분리해야 합니다.",
     classes: ["ElementFieldCellData", "ElementReactionResolver", "ElementFieldVisualController", "ElementFieldEffectSystem"],

@@ -4,7 +4,7 @@
 
 로컬 projectile은 `ProjectileShooter`가 생성하고 `ProjectileBase.Update`에서 직접 시뮬레이션됩니다. 반면 PvP projectile은 Photon Fusion의 network object lifecycle을 따르며, state authority에서 spawn되고 `NetworkProjectileActor.FixedUpdateNetwork`에서 시뮬레이션됩니다.
 
-이 차이 때문에 로컬에서는 동작하던 증강, damage, VFX가 네트워크 projectile에서는 누락될 수 있었습니다.
+이 차이 때문에 로컬에서는 동작하던 증강·damage·VFX가 네트워크 projectile에서는 누락될 수 있었습니다. 특히 VFX와 일부 피드백 구조는 팀원이 증강과 유사한 방식으로 만든 요소였기 때문에, 이를 새로 만든다고 주장하기보다 PvP lifecycle 안에서 정상적으로 재생되게 연결·복구하는 데 초점을 뒀습니다.
 
 ## Solution
 
@@ -44,4 +44,4 @@ flowchart TD
 
 ## Portfolio Point
 
-로컬 전투에서 만든 확장 구조를 PvP에 그대로 끌고 오지 않고, 네트워크 lifecycle에 맞게 payload, authority, spawn, feedback 경로를 재설계한 점이 핵심입니다.
+로컬 전투에서 만든 확장 구조를 PvP에 그대로 끌고 오지 않고, 네트워크 lifecycle에 맞게 payload, authority, spawn, feedback 경로를 다시 연결한 점이 핵심입니다. 팀 작업에서 이미 존재하던 VFX·피드백 요소도 이 경로에 맞춰 정상 출력되는지 확인하며 통합했습니다.

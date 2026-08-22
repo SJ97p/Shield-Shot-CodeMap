@@ -2,7 +2,7 @@
 
 Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당한 게임플레이 시스템 설계, 전투/증강 구조, 속성 필드, PvP 네트워크 전투 안정화와 **Input System V2 리팩토링·성능 검증** 과정을 정리한 포트폴리오용 Code Map입니다.
 
-이 저장소는 전체 Unity 프로젝트를 공개하기보다, 제가 설계 방향을 잡고 직접 통합/수정한 **Projectile Behavior 기반 증강 구조, ElementField 데이터 그리드, PvP 네트워크 투사체/피격/VFX 동기화, 무기/방패 네트워크 스폰, 시행착오 복구 과정**을 중심으로 설명합니다.
+이 저장소는 전체 Unity 프로젝트를 공개하기보다, 한 라운드 안에서도 매번 다른 전투 경험을 만들고 싶었던 요구를 어떤 시스템 구조로 풀었는지 기록합니다. 제가 설계 방향을 잡고 직접 통합·수정한 **Projectile Behavior 기반 증강, ElementField 데이터 그리드, PvP 환경의 투사체·피격·팀 제작 VFX 연동, 입력 구조 개선과 복구 과정**을 중심으로 설명합니다.
 
 > 현재 프로젝트는 개발 진행 중입니다. 문서에서는 플레이 가능 수준까지 통합된 시스템과, 추후 개발 예정 또는 보류된 항목을 구분해 기록합니다.
 
@@ -41,10 +41,10 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 
 - 게임 기획 및 PM으로 전체 요구사항과 일정 흐름 관리
 - 전투/네트워크/몬스터/게임플레이 시스템의 요구사항과 책임 분리 설계
-- 투사체 효과를 외부 Behavior 주입으로 확장할 수 있는 구조 요구사항 설계
+- 투사체 효과를 외부 Behavior 주입으로 확장하고, 전파 여부와 실행 우선순위를 제어할 수 있는 구조 요구사항 설계
 - 팀원이 구현한 `ProjectileShooter`, `ProjectileBase`, `WeaponManager`, `PlayerStatus` 흐름을 프로젝트 요구에 맞게 수정/통합
 - `ElementFieldGrid` 기반 속성 필드와 아레나 좌표계 직접 설계/수정
-- Photon Fusion 기반 PvP 전투 구조, 네트워크 무기/방패/투사체 흐름 설계 및 안정화
+- Photon Fusion 기반 PvP 전투에서 무기·방패·투사체 흐름을 통합하고, 팀이 만든 VFX/피드백 구조가 네트워크에서도 정상 동작하도록 연결·안정화
 - PvP hit 판정, VFX, damage popup, aim line 예측 오류 등 핵심 런타임 문제 디버깅
 - `SceneController` 기반 씬 context 흐름의 뼈대 설계
 - 기존 입력 코드를 보존한 채 V2를 병렬 구축하고, 입력 수집·필터·라우팅·제스처 해석·무기 적용 책임을 분리
@@ -74,14 +74,14 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 
 | System | Design Intent | Result |
 |---|---|---|
-| Projectile Behavior & Augment Injection | 투사체 효과를 조건문 누적이 아니라 외부 Behavior 주입으로 확장 | hit/collision/movement behavior 분리, 우선순위 기반 주입 |
-| ElementField Grid | 속성 장판, 지형 반응, 아레나 기준 좌표계를 하나의 데이터 그리드로 통합 | GameObject cell 의존을 줄이고 `ElementFieldCellData[,]` 중심으로 전환 |
+| Projectile Behavior & Augment Injection | 랜덤 증강 조합이 매 라운드 다른 전투 경험을 만들도록 투사체 효과를 외부 Behavior로 조립 | hit/collision/movement 분리, priority·inherit 기반 전파 제어 |
+| ElementField Grid | 전장 모든 셀을 Collider/GameObject로 유지하지 않고, 속성·지형 규칙을 데이터로 관리 | `ElementFieldCellData[,]` 중심의 필드 판정과 시각화 분리 |
 | PvP Network Projectile Sync | 로컬 투사체와 다른 네트워크 lifecycle에서도 증강, 피격, VFX가 동작하도록 분리 | payload, registry, network actor, RPC 경로 정리 |
 | PvP Hit Detection / Feedback | hit candidate, damage, popup, VFX 단계를 분리해 복구 | hitbox/layer 정규화와 RPC feedback 경로 구성 |
 | Aim Prediction Alignment | 조준선과 실제 투사체의 시작점/반경/layer 기준을 통일 | network projectile spawn offset/radius 기반 예측 provider 추가 |
 | Network Weapon & Shield Spawn | 로비 장착 데이터를 PvP 원격 클라이언트에서도 ID 기반으로 복구 | WeaponId/ShieldId 기반 network prefab 생성 흐름 정리 |
-| Input System V2 | 한 클래스에 얽힌 입력 수집·UI 차단·제스처·전투 적용을 단계별 계약으로 분리 | SOLID 기반 파이프라인과 설정 가능한 공격/방어 영역 구성 |
-| Input V1/V2 Benchmark | 체감 대신 동일 샘플·동일 호출 수로 두 구현을 반복 측정 | Windows 평균 marker total 76.36%, Galaxy S23+ 65.83% 감소 |
+| Input System V2 | 활과 방패를 동시에 다루는 입력을 더 예측 가능하게 만들기 위해 수집·필터·제스처·전투 적용을 분리 | 로컬 입력 흐름 개선과 이후 네트워크 적용의 기반 확보 |
+| Input V1/V2 Benchmark | 체감 대신 동일 샘플·동일 호출 수로 입력 파이프라인만 반복 측정 | 입력 Marker 합계 기준 Windows 76.36%, Galaxy S23+ 65.83% 감소 |
 
 ## Visual Evidence
 
