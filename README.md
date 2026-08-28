@@ -6,28 +6,14 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 
 > 현재 프로젝트는 개발 진행 중입니다. 문서에서는 플레이 가능 수준까지 통합된 시스템과, 추후 개발 예정 또는 보류된 항목을 구분해 기록합니다.
 
-## Game Intro
-
-[![Shield & Shot Game Intro](https://i.ytimg.com/vi/PGad_509g0w/hqdefault.jpg)](https://youtube.com/shorts/PGad_509g0w)
-
-약 50초 안에 Shield & Shot의 분위기와 핵심 전투 플레이를 보여주는 게임 소개 영상입니다.
-
-## Technical Portfolio Demo
-
-[![Shield & Shot Technical Portfolio Demo](https://i.ytimg.com/vi/p6IyCVZkcaY/hqdefault.jpg)](https://youtu.be/p6IyCVZkcaY)
-
-게임플레이 시스템, 속성 필드, PvP 네트워크와 담당 기술을 설명하는 개발 포트폴리오 데모입니다.
-
-두 영상의 썸네일을 클릭하면 각각의 YouTube 영상으로 이동합니다.
-
-- [Interactive GitHub Pages](https://sj97p.github.io/Shield-Shot-CodeMap/)
-- [GitHub Repository](https://github.com/sj97p/Shield-Shot-CodeMap)
-
 ## 바로가기
+
+[![50초 게임 소개 영상 바로가기](assets/navigation/intro-video-link.svg)](https://youtube.com/shorts/PGad_509g0w)
+
+[![포트폴리오 영상 바로가기](assets/navigation/portfolio-video-link.svg)](https://youtu.be/p6IyCVZkcaY)
 
 [![인터랙티브 코드맵](assets/navigation/code-map-link.svg)](https://sj97p.github.io/Shield-Shot-CodeMap/)
 
-> 이미지를 클릭하면 Shield & Shot의 시스템 구조와 기술 문서로 이동합니다.
 ## Project Summary
 
 | Item | Description |
@@ -153,4 +139,6 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - [Current Status & Roadmap](docs/systems/current-status-and-roadmap.md)
 - [Input System V2 Refactoring](docs/systems/input-system-v2-refactoring.md)
 - [Input System V2 Benchmark](docs/systems/input-system-v2-benchmark.md)
+
+
 
