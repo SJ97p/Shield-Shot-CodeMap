@@ -23,6 +23,11 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - [Interactive GitHub Pages](https://sj97p.github.io/Shield-Shot-CodeMap/)
 - [GitHub Repository](https://github.com/sj97p/Shield-Shot-CodeMap)
 
+## 바로가기
+
+[![인터랙티브 코드맵](assets/navigation/code-map-link.svg)](https://sj97p.github.io/Shield-Shot-CodeMap/)
+
+> 이미지를 클릭하면 Shield & Shot의 시스템 구조와 기술 문서로 이동합니다.
 ## Project Summary
 
 | Item | Description |
@@ -148,3 +153,4 @@ Unity 기반 모바일 액션 프로젝트 **Shield & Shot**에서 제가 담당
 - [Current Status & Roadmap](docs/systems/current-status-and-roadmap.md)
 - [Input System V2 Refactoring](docs/systems/input-system-v2-refactoring.md)
 - [Input System V2 Benchmark](docs/systems/input-system-v2-benchmark.md)
+

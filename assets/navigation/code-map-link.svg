@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="220" viewBox="0 0 960 220" role="img" aria-labelledby="title desc">
+  <title id="title">인터랙티브 코드맵 바로가기</title><desc id="desc">프로젝트 시스템 구조와 기술 문서 보기</desc>
+  <rect width="960" height="220" rx="20" fill="#ffffff"/>
+  <rect x="8" y="8" width="944" height="204" rx="14" fill="#f8fafc" stroke="#0f766e" stroke-width="6"/>
+  <rect x="46" y="54" width="110" height="110" rx="20" fill="#0f766e"/>
+  <path d="M75 84h52M75 110h52M75 136h35" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  <text x="195" y="102" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="42" font-weight="700" fill="#0f172a">인터랙티브 코드맵</text>
+  <text x="195" y="152" font-family="Arial, 'Malgun Gothic', sans-serif" font-size="30" fill="#475569">시스템 구조와 기술 문서 바로가기</text>
+  <path d="M855 110H780m75 0-27-27m27 27-27 27" fill="none" stroke="#0f766e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
