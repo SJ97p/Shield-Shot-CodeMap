@@ -4,6 +4,12 @@
 
 한 판은 세 웨이브의 몬스터 방어로 진행됩니다. 웨이브가 끝날 때마다 두 개의 증강 중 하나를 고르고, 불·바람·얼음 속성 무기와 전장 지형, 분열·반사 같은 증강을 조합해 다음 웨이브의 전투 방식을 바꿉니다. 제가 만들고 싶었던 것은 적을 많이 잡는 게임보다, 왼손은 방어를 유지하고 오른손은 조준·차징·발사를 판단하는 순간의 몰입감과 “이번 증강이 뜨면 이 웨이브를 넘길 수 있겠다”는 기대였습니다.
 
+![증강이 적용된 투사체 전투](assets/evidence/projectile-augment-result.gif)
+
+[![50초 게임 소개 영상 바로가기](assets/navigation/intro-video-link.svg)](https://youtube.com/shorts/PGad_509g0w)
+
+[![포트폴리오 영상 바로가기](assets/navigation/portfolio-video-link.svg)](https://youtu.be/p6IyCVZkcaY)
+
 ## 프로젝트 개요
 
 | 항목 | 내용 |
@@ -16,6 +22,10 @@
 
 저는 게임의 전체 요구사항과 시스템의 경계를 설계하고, 각 기능이 실제 플레이에서 맞물리는지 확인하는 역할을 맡았습니다. 몬스터·캐릭터의 세부 구현은 분담했지만, 어떤 웨이브 경험을 만들지, 어떤 데이터를 주고받아야 하는지, 병합한 기능이 어떤 기준을 만족해야 하는지는 직접 조율했습니다.
 
+[![인터랙티브 코드맵](assets/navigation/code-map-link.svg)](https://sj97p.github.io/Shield-Shot-CodeMap/)
+
+> 위 버튼을 누르면 제가 담당한 전체 시스템의 다이어그램과 공개 가능한 코드 전문을 정리한 인터랙티브 코드맵으로 이동합니다.
+
 ## 이 코드맵에서 말하고 싶은 것
 
 ### 양손 조작은 입력값을 섬세하게 다뤄야 했습니다
@@ -24,11 +34,27 @@
 
 이 작업은 `Update()`를 없애기 위한 것이 아니라, 손떨림 같은 작은 입력을 어디에서 걸러내고 어떤 데이터만 게임플레이에 넘길지 제어하기 위한 것이었습니다. 같은 입력 시나리오를 반복 재생하는 벤치마크도 함께 만들어, 입력 Marker 기준 Windows Development Build 76.36%, Galaxy S23+ 65.83% 감소를 확인했습니다. 이는 전체 게임 CPU나 네트워크 트래픽 수치가 아닙니다.
 
+<details>
+<summary>입력 구조와 측정 근거 보기</summary>
+
+`CombatPointerRouter`는 터치 시작 위치에서 공격/방어 채널을 정한 뒤, 해당 포인터가 끝날 때까지 같은 채널로 전달합니다. `PointerMovementThresholdFilter`는 최소 이동 거리보다 작은 움직임을 걸러냅니다. 자세한 비교 조건은 [Input V2 Benchmark](docs/systems/input-system-v2-benchmark.md)에서 확인할 수 있습니다.
+
+</details>
+
 ### 증강은 전투의 기대를 만들었지만, 규칙의 한계도 남겼습니다
 
 기본 화살에 효과를 계속 덧붙이는 게임이라면 투사체 내부 조건문이 늘어나는 방식으로는 오래 버티기 어렵다고 봤습니다. 그래서 이동·충돌·피격 행동을 Behavior로 나누고, 증강과 무기 효과가 외부에서 주입되도록 구성했습니다.
 
 분열과 난반사처럼 순서에 따라 결과가 달라지는 효과는 `Priority`로 실행 순서를 정했고, 자식 화살에 특정 충돌 Behavior를 복사하지 않아 분열이 무한히 전파되는 것을 막았습니다. 이 방식은 원하는 결과를 빠르게 만들 수 있었지만, 증강 수가 늘수록 우선순위를 사람이 계속 판단해야 하는 한계도 남겼습니다. 다시 만든다면 중간 판정 객체가 효과의 실행 단계와 전파 규칙을 해석하도록 바꾸고 싶습니다.
+
+<details>
+<summary>증강이 적용된 투사체 장면과 코드 보기</summary>
+
+![증강 적용 결과](assets/evidence/projectile-augment-result.gif)
+
+`ProjectileBase`는 이동·충돌·피격 Behavior 목록을 Priority 순으로 정렬하고, 자식 투사체로 복사할 때 제외할 충돌 Behavior 타입을 받을 수 있습니다. [투사체 증강 문서](docs/systems/projectile-behavior-augment-injection.md)에서 흐름을 확인할 수 있습니다.
+
+</details>
 
 ### 전장은 Cell을 계속 살아 있게 두지 않고 데이터로 판단했습니다
 
@@ -36,9 +62,29 @@
 
 불 화살은 풀 위에서 더 넓고 오래 남는 화염 필드를 만들고, 바람과 사막은 열풍처럼 주변에 화염 필드를 남기며, 얼음 화살은 물웅덩이를 얼려 지속적인 감속 지형으로 바꿉니다. 속성 화살과 필드 위에 분열까지 붙었을 때 화면 전체가 VFX로 채워지는 순간이 이 게임에서 의도한 핵심 쾌감이었습니다.
 
+<details>
+<summary>속성 필드 반응 장면 보기</summary>
+
+| 불 + 풀 | 바람 + 사막 | 얼음 + 물 |
+|---|---|---|
+| ![불과 풀](assets/evidence/element-field-fire-grass.gif) | ![바람과 사막](assets/evidence/element-field-wind-sand.gif) | ![얼음과 물](assets/evidence/element-field-water-ice.gif) |
+
+[ElementField Grid 문서](docs/systems/element-field-grid.md)에서 데이터 Grid와 반응 처리 흐름을 확인할 수 있습니다.
+
+</details>
+
 ### 네트워크는 완성된 경쟁 모드가 아니라, 확장을 위한 전투 기반으로 다뤘습니다
 
 향후 1:1 랭킹전과 무기 상성, 협동 몬스터 레이드를 확장 방향으로 두고 Photon Fusion 기반 전투 동기화를 통합했습니다. 이 과정에서는 양쪽 플레이어의 무기·속성·증강·데미지뿐 아니라, 호스트/클라이언트에 따른 스폰 위치와 카메라 방향, VFX 회전을 함께 맞춰야 했습니다.
+
+<details>
+<summary>네트워크 무기·방패 동기화 장면 보기</summary>
+
+![네트워크 무기와 방패 생성](assets/evidence/network-weapon-shield-spawn.gif)
+
+![PvP VFX와 피해 UI 동기화](assets/evidence/pvp-vfx-popup-sync.gif)
+
+</details>
 
 ## 핵심 문서
 
@@ -48,14 +94,6 @@
 - [입력 V1/V2 벤치마크](docs/systems/input-system-v2-benchmark.md)
 - [PvP 투사체 동기화](docs/systems/pvp-network-projectile-sync.md)
 - [PvP 통합 복구 회고](docs/systems/pvp-network-recovery-postmortem.md)
-
-## 영상과 코드맵
-
-[![50초 게임 소개 영상 바로가기](assets/navigation/intro-video-link.svg)](https://youtube.com/shorts/PGad_509g0w)
-
-[![포트폴리오 영상 바로가기](assets/navigation/portfolio-video-link.svg)](https://youtu.be/p6IyCVZkcaY)
-
-[![인터랙티브 코드맵](assets/navigation/code-map-link.svg)](https://sj97p.github.io/Shield-Shot-CodeMap/)
 
 ## 협업 방식과 회고
 
