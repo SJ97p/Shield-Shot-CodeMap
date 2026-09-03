@@ -14,77 +14,18 @@
 
 | 항목 | 내용 |
 |---|---|
+| 프로젝트 | Shield & Shot |
+| 장르 | 모바일 하이퍼캐주얼 디펜스 슈팅 |
 | 기간 | 2026.06.04 ~ 2026.07.08 (데모 기준) |
-| 엔진 / 언어 | Unity / C# |
-| 팀 | 6인 팀 프로젝트 |
-| 역할 | 팀장 · PM · 전투/입력/증강/필드/네트워크 시스템 설계 및 통합 |
+| 인원 | 6인 팀 프로젝트 |
+| 역할 | 팀장·PM / 전투·입력·증강·필드·네트워크 시스템 설계 및 통합 |
+| 엔진 / 언어 | Unity 6.3.6f1 / C# |
+| 핵심 기술 | Photon Fusion, Unity Input System, ScriptableObject, URP, VFX Graph |
+| 핵심 설계 | Strategy, Adapter, Object Pool, Registry, Pipeline, 데이터 기반 설계 |
 | 직접 구현·재구성 | Input System V2, Projectile Behavior/Augment, ElementField Grid, Photon Fusion 전투 통합, 플레이 검증 |
+| 프로젝트 목표 | 양손 입력 기반의 방어·조준 경험과 증강·속성 조합에 따른 반복 전투의 변화 구현 |
 
 저는 게임의 전체 요구사항과 시스템의 경계를 설계하고, 각 기능이 실제 플레이에서 맞물리는지 확인하는 역할을 맡았습니다. 몬스터·캐릭터의 세부 구현은 분담했지만, 어떤 웨이브 경험을 만들지, 어떤 데이터를 주고받아야 하는지, 병합한 기능이 어떤 기준을 만족해야 하는지는 직접 조율했습니다.
-
-> 모바일 양손 전투를 중심으로 입력·투사체·증강·속성 필드 시스템을 모듈화하고, 이를 Photon Fusion의 권한 기반 네트워크 생명주기에 통합한 프로젝트입니다.
-
-## 기술 환경과 스택
-
-| 분류 | 기술 | 프로젝트에서의 활용 |
-|---|---|---|
-| Engine / Language | Unity 6.3.6f1 / C# | 모바일 전투, 물리 판정, 씬과 시스템 통합 |
-| Networking | Photon Fusion 1.1.0 | 권한 기반 투사체 생성, 매치 상태, 피격·HP·VFX 동기화 |
-| Input | Unity Input System 1.18.0 | 터치·마우스 입력 수집과 양손 공격/방어 라우팅 |
-| Rendering | URP 17.3.0 | 모바일 렌더링 파이프라인 |
-| VFX / Camera / UI | Visual Effect Graph 17.3.0, Cinemachine 3.1.7, uGUI 2.0 | 속성·피격 표현, PvP 시점, 전투 UI 연동 |
-| Data | ScriptableObject / JSON | 무기·증강·Behavior 데이터와 벤치마크 결과 관리 |
-| Profiling | Unity ProfilerMarker / ProfilerRecorder | 동일 입력 시나리오 기반 V1/V2 처리 비용 비교 |
-| Collaboration | Git / 시스템 단위 브랜치 | 기능별 검증·병합과 통합 충돌 관리 |
-| Validation | Windows Development Build / Galaxy S23+ | 빌드 환경과 실제 Android 기기에서 입력 성능 검증 |
-
-## 설계 선택과 적용 패턴
-
-패턴 이름을 먼저 정하고 코드를 맞춘 것이 아니라, **변경될 가능성이 높은 규칙과 시스템 간 경계를 분리하기 위해 필요한 위치에 적용**했습니다.
-
-| 패턴·원칙 | 적용 위치 | 해결하려던 문제 |
-|---|---|---|
-| Strategy | 투사체 이동·충돌·피격 Behavior | 증강이 늘 때 `ProjectileBase`의 조건문이 계속 증가하는 문제 |
-| Runtime Composition | `ProjectileBehaviorSO`의 Behavior 주입 | 무기·속성·증강 조합에 따라 실행 규칙이 달라지는 문제 |
-| Pipeline / Chain of Responsibility | Input System V2 | 입력 수집·필터·라우팅·해석·적용이 한 흐름으로 결합된 문제 |
-| Adapter | `WeaponAttackInputAdapter`, `ShieldDefenseInputAdapter` | 새 입력 구조를 기존 무기·방패 API에 대규모 수정 없이 연결 |
-| Registry | `ProjectileBehaviorRegistry` | 네트워크로 직접 보낼 수 없는 SO 참조를 코드·레벨 Payload에서 복원 |
-| Factory 성격의 생성 계층 / Object Pool | `ProjectileObjectPool`, `GenericObjectPool<T>` | 투사체 생성·초기화·반환 책임 집중과 반복 생성 관리 |
-| Observer / Event-driven | ElementField의 Cell 변경 이벤트 | 필드 판정 데이터와 상태 효과·VFX 표현의 직접 결합 완화 |
-| Explicit State Machine | `PvpMatchStateController` | 카운트다운·전투·라운드·증강 선택·종료 상태의 권한 기반 진행 |
-| Data-driven Grid | `ElementFieldCellData[,]` | 전장 전체를 GameObject·Collider로 유지하지 않고 셀 상태를 판정 |
-| SRP / ISP / DIP | Input System V2의 작은 계약과 조립 지점 | 책임 분리, 정책 교체, 테스트 대역 구성 가능성 확보 |
-
-### 생성 패턴을 설명할 때의 기준
-
-제가 담당한 범위에서는 전통적인 단일 Factory 클래스보다 **Factory 성격의 생성 계층과 Object Pool, Registry를 조합한 구조**에 가깝습니다. 로컬 투사체는 Pool에서 생성·대여·반환하고, 네트워크 투사체는 State Authority의 `Runner.Spawn`으로 생성합니다. 네트워크 증강은 `BehaviorCode + Level` Payload를 Registry가 실제 Behavior로 복원합니다.
-
-### Photon Fusion 전투 책임
-
-```text
-Input Authority
--> 발사 입력 및 RPC 요청
--> State Authority 검증
--> Runner.Spawn
--> Damage / Augment Payload 주입
--> FixedUpdateNetwork 시뮬레이션
--> Hit / HP / VFX / Damage Popup 동기화
-```
-
-로컬 투사체의 `Update()` 생명주기를 네트워크에 그대로 끌고 오지 않았습니다. 네트워크에서 공유해야 하는 damage, behavior, owner, VFX 기준은 명시적인 데이터로 전달하고, 생성과 판정은 State Authority가 담당하도록 분리했습니다.
-
-## 포트폴리오 핵심 요약
-
-- **입력 시스템 재설계**: 입력 수집 → 차단 정책 → 미세 이동 필터 → 프레임 내 이동 병합 → 공격/방어 라우팅 → 제스처 해석 → Adapter 적용으로 책임을 분리했습니다.
-- **측정 가능한 개선**: 동일한 10초·초당 120개 입력 시나리오에서 입력 Marker 평균 비용을 Windows Development Build 76.36%, Galaxy S23+ 65.83% 줄였습니다. 이는 전체 게임 CPU나 네트워크 트래픽 수치가 아닙니다.
-- **확장 가능한 전투**: 투사체의 이동·충돌·피격 규칙을 Strategy 기반 Behavior로 분리하고, ScriptableObject를 통해 조합·주입했습니다.
-- **데이터 기반 전장**: `ElementFieldCellData[,]`를 기준 데이터로 삼아 불+풀, 바람+사막, 얼음+물 반응을 계산하고, 판정과 시각화를 분리했습니다.
-- **네트워크 생명주기 통합**: 로컬 증강을 전송 가능한 Payload로 변환하고, Photon Fusion의 Input/State Authority·RPC·Network Spawn 흐름에 피격과 피드백을 연결했습니다.
-- **팀 통합과 복구**: 병합 후 누락된 PvP 기능을 생성 데이터 → Network Object → Authority → Hit Event → Feedback RPC 단계로 추적해 기존 구조를 유지하며 복구했습니다.
-
-### 30초 소개
-
-> Shield & Shot에서 팀장과 PM을 맡아 입력, 투사체, 증강, 필드, 네트워크 시스템을 설계하고 통합했습니다. 투사체 효과는 Strategy 기반 Behavior로 분리해 런타임에 주입했고, 속성 필드는 GameObject가 아닌 2차원 셀 데이터로 판정했습니다. Photon Fusion에서는 로컬 ScriptableObject 증강을 코드와 레벨 Payload로 변환하고, State Authority가 투사체 생성과 피격을 처리하도록 연결했습니다. 또한 입력 시스템을 파이프라인 구조로 재설계하고 동일 입력 벤치마크를 구축해 Galaxy S23+에서 입력 Marker 평균 비용이 65.83% 감소한 것을 확인했습니다.
 
 [![인터랙티브 코드맵](assets/navigation/code-map-link.svg)](https://sj97p.github.io/Shield-Shot-CodeMap/)
 
