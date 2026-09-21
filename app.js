@@ -562,6 +562,7 @@ const cases = [
     alternatives: "Cell별 GameObject·Collider 판정 / 월드 좌표를 Cell Index로 바꿔 데이터에서 판정",
     decision: "화살·몬스터·벽의 물리 Collider는 유지하되, 속성 필드와 지형 반응만 ElementFieldCellData[,]를 기준으로 분리했습니다. 화살 위치는 WorldToCell로 변환하고 Paint·PaintCircle로 데이터를 갱신합니다.",
     structure: ["투사체 궤적", "WorldToCell", "ElementFieldCellData[,] 갱신", "속성·지형 반응", "몬스터 효과·VFX"],
+    implementation: "ElementFieldGrid가 Cell 배열과 월드 좌표 변환을 맡고, ElementReactionResolver가 화살 속성·지형 속성 조합을 해석합니다. 얼음과 물의 연결 영역은 Queue와 방문 집합으로 탐색했습니다.",
     evidence: "불+풀, 바람+사막, 얼음+물 반응을 실제 전투 GIF로 확인했습니다. 얼음과 물은 반경 판정 대신 연결된 물 Cell만 Queue와 방문 집합으로 탐색하는 BFS Flood Fill로 동결 영역을 결정했습니다.",
     feedback: "이 사례는 성능 수치를 측정한 결과가 아니라, 속성 필드의 판정 기준을 데이터로 통일해 반응을 구현한 결과입니다. PvP에서 Cell 상태가 전투 판정으로 확장된다면 active cell 동기화 정책을 별도로 설계해야 합니다.",
   },
@@ -576,6 +577,7 @@ const cases = [
     alternatives: "기존 V1 흐름 안에서 개별 조건 보완 / 입력 수집부터 무기·방패 연결까지 책임을 다시 분리",
     decision: "V1은 비교 기준으로 남기고 V2를 별도 파이프라인으로 만들었습니다. Source → Filter → Router → Gesture/Interpreter → Adapter로 나눠, 작은 이동은 입력 경계에서 걸러내고 시작 위치로 정한 공격·방어 역할을 포인터 종료까지 유지했습니다.",
     structure: ["Unity Pointer", "Movement Filter", "Combat Router", "Attack·Defense Interpreter", "Weapon·Shield Adapter"],
+    implementation: "PointerMovementThresholdFilter가 작은 이동을 먼저 제외하고, CombatPointerRouter가 시작 위치로 정한 채널을 유지합니다. 무기와 방패는 각 Interpreter·Adapter를 통해 입력을 소비합니다.",
     evidence: "동일한 10초 선형 드래그 12,010개 샘플을 V1과 V2에 각각 10회 주입했습니다. Input Marker 누적 비용은 Windows Development Build에서 76.36%, Galaxy S23+에서 65.83% 감소했습니다. 전체 FPS 개선 수치가 아니라 입력 파이프라인만 측정한 결과입니다.",
     feedback: "실제 모바일 입력 불안정을 수치로 해결했다는 주장은 하지 않습니다. 다음에는 이 파이프라인과 네트워크 Tick·송신 정책을 연결해 입력 빈도와 원격 반응을 함께 검증해야 합니다.",
   },
@@ -590,6 +592,7 @@ const cases = [
     alternatives: "ProjectileBase 내부 조건문 누적 / 이동·충돌·피격 시점별 Behavior 주입",
     decision: "IMovementBehavior, ICollisionBehavior, IHitBehavior를 분리하고, ProjectileBehaviorSO가 발사 시점에 런타임 투사체로 효과를 주입하게 했습니다. 투사체는 피해만 전달하고, 대상의 처리 방식은 대상 시스템이 결정하도록 책임을 나눴습니다.",
     structure: ["증강·무기 선택", "ProjectileBehaviorSO", "ProjectileBase에 Behavior 주입", "이동·충돌·피격 시점 실행", "대상 효과·VFX"],
+    implementation: "ProjectileBase는 Behavior 목록을 시점별로 실행하고, BehaviorSO가 이동·충돌·피격 구현체를 제공합니다. 자식 투사체에는 제외할 Collision Behavior 타입을 전달해 상속 범위를 제한했습니다.",
     evidence: "분열과 난반사는 실행 순서와 자식 화살 상속 여부에 따라 결과가 달랐습니다. 당시에는 Priority 정렬과 제외할 Collision Behavior 타입을 사용해 무한 분열을 막고, 실제 증강 적용 전투 GIF로 결과를 확인했습니다.",
     feedback: "Priority와 상속 제외 규칙은 빠르게 원하는 결과를 만들었지만, 증강이 늘면 개발자가 기존 규칙을 기억해 직접 입력해야 하는 한계가 있습니다. 다시 만든다면 중앙 resolver가 실행 단계와 상속 정책을 해석하도록 바꾸겠습니다.",
   },
@@ -604,6 +607,7 @@ const cases = [
     alternatives: "로컬 ScriptableObject 참조를 네트워크 흐름에 직접 의존 / 발사 시 필요한 데이터를 Payload로 직렬화하고 런타임 Behavior로 복구",
     decision: "NetworkProjectileFireHandler가 BehaviorCode·Level·속성 정보를 Payload로 만들고, ProjectileBehaviorRegistry가 네트워크 투사체에서 runtime Behavior로 복구하도록 구성했습니다. Network Object 생성, hit, VFX·damage popup을 분리된 RPC 흐름으로 연결했습니다.",
     structure: ["발사 입력", "Fire Handler", "Augment Payload", "Runner.Spawn", "Network Projectile", "Hit·VFX·Popup RPC"],
+    implementation: "NetworkProjectileFireHandler가 선택 데이터를 Payload로 직렬화하고, NetworkProjectileActor가 스폰 뒤 Registry를 통해 Behavior를 복구합니다. 피격 정보와 시각 피드백은 각 RPC 처리 경계에서 분리했습니다.",
     evidence: "두 클라이언트에서 무기·방패가 생성되는 장면과 피격 VFX·damage popup 동기화 GIF를 확인했습니다. Wind·Ice 시각 효과 전체 동기화는 기반만 마련했고 최종 검증이 남았습니다.",
     feedback: "완성된 경쟁 모드가 아니라 확장을 위한 전투 기반입니다. 무기 ID·payload 버전·active field sync의 검증 기준을 별도 문서와 테스트로 강화해야 합니다.",
   },
@@ -727,6 +731,7 @@ function renderCaseDetail(item) {
       <article><h3>선택한 방식</h3><p>${escapeHtml(item.decision)}</p></article>
     </div>
     <section class="case-flow"><h3>구조·구현 흐름</h3><ol>${flow}</ol></section>
+    <section class="case-implementation"><h3>구현과 근거</h3><p>${escapeHtml(item.implementation)}</p></section>
     <section class="case-feedback case-result-panel"><strong>확인한 결과</strong><p>${escapeHtml(item.evidence)}</p></section>
     <footer class="case-feedback"><strong>자체 피드백</strong><p>${escapeHtml(item.feedback)}</p><a href="${escapeHtml(item.document)}" target="_blank" rel="noreferrer">문서 원문 보기 ↗</a></footer>
   `;
