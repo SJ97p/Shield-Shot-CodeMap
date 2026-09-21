@@ -725,9 +725,9 @@ function renderCaseDetail(item) {
       <article><h3>상황</h3><p>${escapeHtml(item.situation)}</p></article>
       <article><h3>검토한 방식</h3><p>${escapeHtml(item.alternatives)}</p></article>
       <article><h3>선택한 방식</h3><p>${escapeHtml(item.decision)}</p></article>
-      <article><h3>확인한 결과</h3><p>${escapeHtml(item.evidence)}</p></article>
     </div>
-    <section class="case-flow"><h3>구조 흐름</h3><ol>${flow}</ol></section>
+    <section class="case-flow"><h3>구조·구현 흐름</h3><ol>${flow}</ol></section>
+    <section class="case-feedback case-result-panel"><strong>확인한 결과</strong><p>${escapeHtml(item.evidence)}</p></section>
     <footer class="case-feedback"><strong>자체 피드백</strong><p>${escapeHtml(item.feedback)}</p><a href="${escapeHtml(item.document)}" target="_blank" rel="noreferrer">문서 원문 보기 ↗</a></footer>
   `;
 

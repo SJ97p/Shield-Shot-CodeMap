@@ -465,6 +465,7 @@ h3 { margin-bottom: 8px; font-size: 16px; color: var(--accent); }
 
 .case-feedback strong { color: var(--text); font-size: 14px; }
 .case-feedback a { font-size: 13px; font-weight: 750; white-space: nowrap; }
+.case-result-panel { border-radius: 0; }
 .graph-head {
   display: flex;
   justify-content: space-between;
