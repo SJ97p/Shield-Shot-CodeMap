@@ -316,6 +316,8 @@ Object.assign(nodes, {
   }),
 });
 
+window.dispatchEvent(new Event("codemap-input-v2-ready"));
+
 treeGroups.push(
   { title: "입력 시스템 V2", ids: ["inputV2", "inputV1VsV2", "inputBenchmark"] },
   { title: "입력 파이프라인 클래스", ids: ["UnityPointerInputDriver", "PointerMovementThresholdFilter", "PointerMoveCoalescingSink", "CombatPointerRouter", "PointerGestureTracker", "AttackGestureInterpreter", "DefenseGestureInterpreter", "WeaponAttackInputAdapter", "ShieldDefenseInputAdapter", "InputSystemV2RuntimeBehaviour"] },

@@ -31,6 +31,19 @@
 
 > 위 버튼을 누르면 제가 담당한 전체 시스템의 다이어그램과 공개 가능한 코드 전문을 정리한 인터랙티브 코드맵으로 이동합니다.
 
+## 사례별로 읽기
+
+코드맵 첫 화면에서는 전체 그래프보다 먼저, 한 사례를 **상황 → 검토한 방식 → 선택한 방식 → 구조 → 코드·근거 → 자체 피드백** 순서로 읽을 수 있습니다. 그래프와 코드 탐색기는 그대로 유지되며, 사례를 읽은 뒤 관련 노드와 소스 파일을 바로 이어서 확인할 수 있습니다.
+
+| 사례 | 무엇을 확인할 수 있는가 | 바로가기 |
+|---|---|---|
+| Grid Cell 기반 속성 전장 | Collider 중심 처리 대신 `ElementFieldCellData[,]`를 전장 판정 기준으로 둔 이유와 물 지형 BFS 동결 | [사례 보기](https://sj97p.github.io/Shield-Shot-CodeMap/#case=grid-cell) |
+| 양손 조작 Input V1 → V2 | 입력 수집·필터·공격/방어 라우팅·제스처·Adapter로 책임을 나눈 구조와 V1/V2 비교 측정 | [사례 보기](https://sj97p.github.io/Shield-Shot-CodeMap/#case=input-v1-v2) |
+| 증강 조합과 투사체 행동 주입 | 분열·반사·관통 효과를 이동·충돌·피격 Behavior로 조립한 구조와 Priority의 한계 | [사례 보기](https://sj97p.github.io/Shield-Shot-CodeMap/#case=projectile-augment) |
+| Photon Fusion 전투 동기화 | 무기·속성·증강 Payload 복구와 피격·VFX·팝업 동기화 흐름 | [사례 보기](https://sj97p.github.io/Shield-Shot-CodeMap/#case=fusion-pvp) |
+
+> 각 사례의 결과는 측정했다면 조건과 범위를 함께 표기했습니다. 입력 사례의 감소율은 전체 FPS가 아니라, 동일 입력 시나리오에서 측정한 Input Marker 누적 비용입니다.
+
 ## 이 코드맵에서 말하고 싶은 것
 
 ### 양손 조작은 입력값을 섬세하게 다뤄야 했습니다

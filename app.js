@@ -550,6 +550,65 @@ Object.assign(nodes, {
   }),
 });
 
+const cases = [
+  {
+    id: "grid-cell",
+    number: "01",
+    title: "Grid Cell 기반 속성 전장",
+    nodeId: "field",
+    document: "docs/systems/element-field-grid.md",
+    card: "타일 Collider 대신 좌표와 상태 데이터를 기준으로 속성 필드와 지형 반응을 처리한 사례",
+    situation: "불·바람·얼음 화살과 풀·사막·물 지형이 만나면 전장에 남은 상태를 계속 읽어야 했습니다. 처음에는 타일마다 Collider를 두는 방식을 검토했지만, 많은 Cell이 화살과 계속 충돌을 확인하면 모바일에서 처리 부담과 규칙 디버깅 범위가 함께 커질 수 있다고 봤습니다.",
+    alternatives: "Cell별 GameObject·Collider 판정 / 월드 좌표를 Cell Index로 바꿔 데이터에서 판정",
+    decision: "화살·몬스터·벽의 물리 Collider는 유지하되, 속성 필드와 지형 반응만 ElementFieldCellData[,]를 기준으로 분리했습니다. 화살 위치는 WorldToCell로 변환하고 Paint·PaintCircle로 데이터를 갱신합니다.",
+    structure: ["투사체 궤적", "WorldToCell", "ElementFieldCellData[,] 갱신", "속성·지형 반응", "몬스터 효과·VFX"],
+    evidence: "불+풀, 바람+사막, 얼음+물 반응을 실제 전투 GIF로 확인했습니다. 얼음과 물은 반경 판정 대신 연결된 물 Cell만 Queue와 방문 집합으로 탐색하는 BFS Flood Fill로 동결 영역을 결정했습니다.",
+    feedback: "이 사례는 성능 수치를 측정한 결과가 아니라, 속성 필드의 판정 기준을 데이터로 통일해 반응을 구현한 결과입니다. PvP에서 Cell 상태가 전투 판정으로 확장된다면 active cell 동기화 정책을 별도로 설계해야 합니다.",
+  },
+  {
+    id: "input-v1-v2",
+    number: "02",
+    title: "양손 조작을 위한 Input V1 → V2",
+    nodeId: "inputV2",
+    document: "docs/systems/input-system-v2-refactoring.md",
+    card: "터치 시작 위치로 공격·방어를 나누고, 원시 입력을 제스처 이전에 관리하도록 다시 구성한 사례",
+    situation: "왼손 방패와 오른손 무기를 동시에 다루는 게임에서 원시 터치를 곧바로 제스처와 무기에 전달하면, 손떨림처럼 의미 없는 움직임까지 후속 로직으로 흘러갈 수 있었습니다. V1은 수집·제스처·게임플레이 전달 주기가 프레임 흐름에 묶여 있어, 어느 단계에서 입력을 보정할지 분명하지 않았습니다.",
+    alternatives: "기존 V1 흐름 안에서 개별 조건 보완 / 입력 수집부터 무기·방패 연결까지 책임을 다시 분리",
+    decision: "V1은 비교 기준으로 남기고 V2를 별도 파이프라인으로 만들었습니다. Source → Filter → Router → Gesture/Interpreter → Adapter로 나눠, 작은 이동은 입력 경계에서 걸러내고 시작 위치로 정한 공격·방어 역할을 포인터 종료까지 유지했습니다.",
+    structure: ["Unity Pointer", "Movement Filter", "Combat Router", "Attack·Defense Interpreter", "Weapon·Shield Adapter"],
+    evidence: "동일한 10초 선형 드래그 12,010개 샘플을 V1과 V2에 각각 10회 주입했습니다. Input Marker 누적 비용은 Windows Development Build에서 76.36%, Galaxy S23+에서 65.83% 감소했습니다. 전체 FPS 개선 수치가 아니라 입력 파이프라인만 측정한 결과입니다.",
+    feedback: "실제 모바일 입력 불안정을 수치로 해결했다는 주장은 하지 않습니다. 다음에는 이 파이프라인과 네트워크 Tick·송신 정책을 연결해 입력 빈도와 원격 반응을 함께 검증해야 합니다.",
+  },
+  {
+    id: "projectile-augment",
+    number: "03",
+    title: "증강 조합과 투사체 행동 주입",
+    nodeId: "augment",
+    document: "docs/systems/projectile-behavior-augment-injection.md",
+    card: "분열·반사·관통·속성 효과를 투사체 내부 조건문이 아니라 실행 시점별 Behavior로 조립한 사례",
+    situation: "웨이브마다 증강을 선택해 전투 방식이 바뀌는 게임이므로, 기본 화살에 효과가 계속 추가됩니다. 모든 조합을 ProjectileBase 내부 조건문으로 처리하면 기능 하나를 늘릴 때 기존 경우를 함께 수정해야 한다고 판단했습니다.",
+    alternatives: "ProjectileBase 내부 조건문 누적 / 이동·충돌·피격 시점별 Behavior 주입",
+    decision: "IMovementBehavior, ICollisionBehavior, IHitBehavior를 분리하고, ProjectileBehaviorSO가 발사 시점에 런타임 투사체로 효과를 주입하게 했습니다. 투사체는 피해만 전달하고, 대상의 처리 방식은 대상 시스템이 결정하도록 책임을 나눴습니다.",
+    structure: ["증강·무기 선택", "ProjectileBehaviorSO", "ProjectileBase에 Behavior 주입", "이동·충돌·피격 시점 실행", "대상 효과·VFX"],
+    evidence: "분열과 난반사는 실행 순서와 자식 화살 상속 여부에 따라 결과가 달랐습니다. 당시에는 Priority 정렬과 제외할 Collision Behavior 타입을 사용해 무한 분열을 막고, 실제 증강 적용 전투 GIF로 결과를 확인했습니다.",
+    feedback: "Priority와 상속 제외 규칙은 빠르게 원하는 결과를 만들었지만, 증강이 늘면 개발자가 기존 규칙을 기억해 직접 입력해야 하는 한계가 있습니다. 다시 만든다면 중앙 resolver가 실행 단계와 상속 정책을 해석하도록 바꾸겠습니다.",
+  },
+  {
+    id: "fusion-pvp",
+    number: "04",
+    title: "Photon Fusion 전투 동기화 통합",
+    nodeId: "pvpProjectile",
+    document: "docs/systems/pvp-network-projectile-sync.md",
+    card: "선택한 무기·속성·증강을 네트워크 투사체로 복구하고, 피격·VFX·팝업까지 같은 사건으로 보이게 한 사례",
+    situation: "향후 1:1 PvP와 협동 레이드 확장을 염두에 두고, 로컬 전투에서 쓰던 무기·속성·증강·데미지를 Fusion 환경에서도 재현해야 했습니다. 특히 호스트와 클라이언트에 따라 스폰 위치, 카메라 방향, VFX 회전이 달라져 보정 기준이 필요했습니다.",
+    alternatives: "로컬 ScriptableObject 참조를 네트워크 흐름에 직접 의존 / 발사 시 필요한 데이터를 Payload로 직렬화하고 런타임 Behavior로 복구",
+    decision: "NetworkProjectileFireHandler가 BehaviorCode·Level·속성 정보를 Payload로 만들고, ProjectileBehaviorRegistry가 네트워크 투사체에서 runtime Behavior로 복구하도록 구성했습니다. Network Object 생성, hit, VFX·damage popup을 분리된 RPC 흐름으로 연결했습니다.",
+    structure: ["발사 입력", "Fire Handler", "Augment Payload", "Runner.Spawn", "Network Projectile", "Hit·VFX·Popup RPC"],
+    evidence: "두 클라이언트에서 무기·방패가 생성되는 장면과 피격 VFX·damage popup 동기화 GIF를 확인했습니다. Wind·Ice 시각 효과 전체 동기화는 기반만 마련했고 최종 검증이 남았습니다.",
+    feedback: "완성된 경쟁 모드가 아니라 확장을 위한 전투 기반입니다. 무기 ID·payload 버전·active field sync의 검증 기준을 별도 문서와 테스트로 강화해야 합니다.",
+  },
+];
+
 const treeGroups = [
   { title: "핵심 시스템", ids: ["overview", "augment", "field", "pvpProjectile", "aimPrediction", "hitFeedback", "networkSpawn"] },
   { title: "투사체·증강 클래스", ids: ["ProjectileBehaviorSO", "ProjectileShooter", "ProjectileBase", "ProjectileBehaviorRegistry", "PvpProjectileAugmentPayload", "PvpProjectileAugmentEntry"] },
@@ -562,6 +621,7 @@ const expandedTreeGroups = new Set();
 let treeSearchQuery = "";
 
 let currentNodeId = "overview";
+let currentCaseId = null;
 let currentCodeFiles = [];
 let graphScale = 1;
 let graphBaseSize = { width: 760, height: 420 };
@@ -569,6 +629,9 @@ const navStack = [];
 
 const els = {
   layout: document.getElementById("layout"),
+  caseHub: document.getElementById("case-hub"),
+  caseCards: document.getElementById("case-card-list"),
+  caseDetail: document.getElementById("case-detail"),
   tree: document.getElementById("tree"),
   treeSearch: document.getElementById("explorer-search"),
   title: document.getElementById("node-title"),
@@ -617,6 +680,103 @@ function classGraph(name, members, links) {
 ${body}
       }
 ${relations}`;
+}
+
+function getCase(id) {
+  return cases.find((item) => item.id === id) || null;
+}
+
+function renderCaseCards() {
+  els.caseCards.innerHTML = cases.map((item) => `
+    <article class="case-card">
+      <p class="case-number">CASE ${escapeHtml(item.number)}</p>
+      <h3>${escapeHtml(item.title)}</h3>
+      <p>${escapeHtml(item.card)}</p>
+      <button type="button" class="case-open" data-case-id="${escapeHtml(item.id)}">사례 읽기 →</button>
+    </article>
+  `).join("");
+
+  els.caseCards.querySelectorAll("[data-case-id]").forEach((button) => {
+    button.addEventListener("click", () => selectCase(button.dataset.caseId));
+  });
+}
+
+function renderCaseDetail(item) {
+  if (!item) {
+    els.caseDetail.hidden = true;
+    els.caseDetail.innerHTML = "";
+    return;
+  }
+
+  const flow = item.structure.map((step, index) => `
+    <li><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(step)}</li>
+  `).join("");
+
+  els.caseDetail.hidden = false;
+  els.caseDetail.innerHTML = `
+    <header class="case-detail-head">
+      <div>
+        <p class="case-number">SHIELD & SHOT · CASE ${escapeHtml(item.number)}</p>
+        <h2>${escapeHtml(item.title)}</h2>
+      </div>
+      <button type="button" class="case-back" data-app-view="cases">사례 목록</button>
+    </header>
+    <div class="case-story-grid">
+      <article><h3>상황</h3><p>${escapeHtml(item.situation)}</p></article>
+      <article><h3>검토한 방식</h3><p>${escapeHtml(item.alternatives)}</p></article>
+      <article><h3>선택한 방식</h3><p>${escapeHtml(item.decision)}</p></article>
+      <article><h3>확인한 결과</h3><p>${escapeHtml(item.evidence)}</p></article>
+    </div>
+    <section class="case-flow"><h3>구조 흐름</h3><ol>${flow}</ol></section>
+    <footer class="case-feedback"><strong>자체 피드백</strong><p>${escapeHtml(item.feedback)}</p><a href="${escapeHtml(item.document)}" target="_blank" rel="noreferrer">문서 원문 보기 ↗</a></footer>
+  `;
+
+  els.caseDetail.querySelectorAll("[data-app-view]").forEach((button) => {
+    button.addEventListener("click", () => setAppView(button.dataset.appView));
+  });
+}
+
+function updateAppNavigation(view) {
+  document.querySelectorAll("[data-app-view]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.appView === view);
+  });
+}
+
+function setAppView(view, options = {}) {
+  if (view === "cases") {
+    currentCaseId = null;
+    els.layout.classList.remove("case-mode");
+    renderCaseDetail(null);
+    els.caseHub.hidden = false;
+    els.layout.hidden = true;
+    updateAppNavigation("cases");
+    if (options.updateHash !== false) history.replaceState(null, "", "#cases");
+    return;
+  }
+
+  currentCaseId = null;
+  els.layout.classList.remove("case-mode");
+  renderCaseDetail(null);
+  els.caseHub.hidden = true;
+  els.layout.hidden = false;
+  updateAppNavigation(view);
+  if (view === "systems") {
+    selectNode("overview", { pushHistory: false, preserveScroll: false, preserveCase: true });
+  }
+  if (options.updateHash !== false) history.replaceState(null, "", `#${view}`);
+}
+
+function selectCase(id, options = {}) {
+  const item = getCase(id);
+  if (!item) return;
+  currentCaseId = item.id;
+  els.layout.classList.add("case-mode");
+  els.caseHub.hidden = true;
+  els.layout.hidden = false;
+  updateAppNavigation("cases");
+  renderCaseDetail(item);
+  if (options.updateHash !== false) history.replaceState(null, "", `#case=${encodeURIComponent(item.id)}`);
+  selectNode(item.nodeId, { pushHistory: false, preserveScroll: false, preserveCase: true });
 }
 
 function renderTree() {
@@ -686,6 +846,11 @@ function renderTree() {
 async function selectNode(id, options = {}) {
   const node = nodes[id];
   if (!node) return;
+  if (!options.preserveCase) {
+    currentCaseId = null;
+    els.layout.classList.remove("case-mode");
+    renderCaseDetail(null);
+  }
   const scrollState = captureScrollState();
   const shouldPushHistory = options.pushHistory !== false && currentNodeId && currentNodeId !== id;
   if (shouldPushHistory) navStack.push(currentNodeId);
@@ -808,9 +973,27 @@ async function renderGraph(node) {
     applyGraphScale();
     attachGraphClicks(node);
   } catch (err) {
-    els.graph.className = "graph-error";
-    els.graph.innerHTML = `<strong>Mermaid diagram을 렌더링하지 못했습니다.</strong><pre>${escapeHtml(node.graph || "")}</pre>`;
+    renderGraphFallback(node);
   }
+}
+
+function renderGraphFallback(node) {
+  const classButtons = (node.classes || []).map((id) => {
+    const target = nodes[id];
+    if (!target) return "";
+    return `<button type="button" data-node-id="${escapeHtml(id)}">${escapeHtml(target.title)}</button>`;
+  }).join("");
+  els.graph.className = "graph-fallback";
+  els.graph.innerHTML = `
+    <p class="graph-fallback-kicker">STRUCTURE SUMMARY</p>
+    <strong>${escapeHtml(node.title)}</strong>
+    <p>${escapeHtml(node.summary || "")}</p>
+    <div class="graph-fallback-nodes">${classButtons || "<span>이 노드에는 연결된 클래스가 없습니다.</span>"}</div>
+    <p class="graph-fallback-note">그래프 라이브러리를 불러올 수 없는 환경에서도, 관련 클래스와 코드 탐색은 계속 사용할 수 있습니다.</p>
+  `;
+  els.graph.querySelectorAll("[data-node-id]").forEach((button) => {
+    button.addEventListener("click", () => selectNode(button.dataset.nodeId));
+  });
 }
 
 function attachGraphClicks(node) {
@@ -1083,5 +1266,27 @@ els.codeResizer.addEventListener("keydown", (event) => {
 setCodePanelWidth(defaultCodePanelWidth);
 
 window.selectNode = selectNode;
+document.querySelectorAll("[data-app-view]").forEach((button) => {
+  button.addEventListener("click", () => setAppView(button.dataset.appView));
+});
+
+function openInitialView() {
+  const hash = decodeURIComponent(window.location.hash || "");
+  const caseMatch = hash.match(/^#case=(.+)$/);
+  if (caseMatch && getCase(caseMatch[1])) {
+    selectCase(caseMatch[1], { updateHash: false });
+    return;
+  }
+  if (hash === "#systems" || hash === "#code") {
+    setAppView(hash.slice(1), { updateHash: false });
+    return;
+  }
+  setAppView("cases", { updateHash: false });
+}
+
+renderCaseCards();
 renderTree();
-selectNode("overview", { pushHistory: false, preserveScroll: false });
+selectNode("overview", { pushHistory: false, preserveScroll: false, preserveCase: true });
+openInitialView();
+window.addEventListener("hashchange", openInitialView);
+window.addEventListener("codemap-input-v2-ready", openInitialView);
