@@ -476,6 +476,9 @@ h3 { margin-bottom: 8px; font-size: 16px; color: var(--accent); }
 .case-feedback strong { color: var(--text); font-size: 14px; }
 .case-feedback a { font-size: 13px; font-weight: 750; white-space: nowrap; }
 .case-result-panel { border-radius: 0; }
+.case-actions { display: flex; padding: 14px 0 4px; }
+.case-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--accent); border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; font: inherit; font-size: 14px; font-weight: 750; }
+.case-cta:hover { filter: brightness(.96); }
 .graph-head {
   display: flex;
   justify-content: space-between;

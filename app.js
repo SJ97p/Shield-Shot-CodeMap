@@ -556,7 +556,6 @@ const cases = [
     number: "01",
     title: "Grid Cell 기반 속성 전장",
     nodeId: "field",
-    document: "docs/systems/element-field-grid.md",
     card: "타일 Collider 대신 좌표와 상태 데이터를 기준으로 속성 필드와 지형 반응을 처리한 사례",
     situation: "불·바람·얼음 화살과 풀·사막·물 지형이 만나면 전장에 남은 상태를 계속 읽어야 했습니다. 처음에는 타일마다 Collider를 두는 방식을 검토했지만, 많은 Cell이 화살과 계속 충돌을 확인하면 모바일에서 처리 부담과 규칙 디버깅 범위가 함께 커질 수 있다고 봤습니다.",
     alternatives: "Cell별 GameObject·Collider 판정 / 월드 좌표를 Cell Index로 바꿔 데이터에서 판정",
@@ -571,7 +570,6 @@ const cases = [
     number: "02",
     title: "양손 조작을 위한 Input V1 → V2",
     nodeId: "inputV2",
-    document: "docs/systems/input-system-v2-refactoring.md",
     card: "터치 시작 위치로 공격·방어를 나누고, 원시 입력을 제스처 이전에 관리하도록 다시 구성한 사례",
     situation: "왼손 방패와 오른손 무기를 동시에 다루는 게임에서 원시 터치를 곧바로 제스처와 무기에 전달하면, 손떨림처럼 의미 없는 움직임까지 후속 로직으로 흘러갈 수 있었습니다. V1은 수집·제스처·게임플레이 전달 주기가 프레임 흐름에 묶여 있어, 어느 단계에서 입력을 보정할지 분명하지 않았습니다.",
     alternatives: "기존 V1 흐름 안에서 개별 조건 보완 / 입력 수집부터 무기·방패 연결까지 책임을 다시 분리",
@@ -586,7 +584,6 @@ const cases = [
     number: "03",
     title: "증강 조합과 투사체 행동 주입",
     nodeId: "augment",
-    document: "docs/systems/projectile-behavior-augment-injection.md",
     card: "분열·반사·관통·속성 효과를 투사체 내부 조건문이 아니라 실행 시점별 Behavior로 조립한 사례",
     situation: "웨이브마다 증강을 선택해 전투 방식이 바뀌는 게임이므로, 기본 화살에 효과가 계속 추가됩니다. 모든 조합을 ProjectileBase 내부 조건문으로 처리하면 기능 하나를 늘릴 때 기존 경우를 함께 수정해야 한다고 판단했습니다.",
     alternatives: "ProjectileBase 내부 조건문 누적 / 이동·충돌·피격 시점별 Behavior 주입",
@@ -601,7 +598,6 @@ const cases = [
     number: "04",
     title: "Photon Fusion 전투 동기화 통합",
     nodeId: "pvpProjectile",
-    document: "docs/systems/pvp-network-projectile-sync.md",
     card: "선택한 무기·속성·증강을 네트워크 투사체로 복구하고, 피격·VFX·팝업까지 같은 사건으로 보이게 한 사례",
     situation: "향후 1:1 PvP와 협동 레이드 확장을 염두에 두고, 로컬 전투에서 쓰던 무기·속성·증강·데미지를 Fusion 환경에서도 재현해야 했습니다. 특히 호스트와 클라이언트에 따라 스폰 위치, 카메라 방향, VFX 회전이 달라져 보정 기준이 필요했습니다.",
     alternatives: "로컬 ScriptableObject 참조를 네트워크 흐름에 직접 의존 / 발사 시 필요한 데이터를 Payload로 직렬화하고 런타임 Behavior로 복구",
@@ -733,11 +729,18 @@ function renderCaseDetail(item) {
     <section class="case-flow"><h3>구조·구현 흐름</h3><ol>${flow}</ol></section>
     <section class="case-implementation"><h3>구현과 근거</h3><p>${escapeHtml(item.implementation)}</p></section>
     <section class="case-feedback case-result-panel"><strong>확인한 결과</strong><p>${escapeHtml(item.evidence)}</p></section>
-    <footer class="case-feedback"><strong>자체 피드백</strong><p>${escapeHtml(item.feedback)}</p><a href="${escapeHtml(item.document)}" target="_blank" rel="noreferrer">문서 원문 보기 ↗</a></footer>
+    <footer class="case-feedback"><strong>자체 피드백</strong><p>${escapeHtml(item.feedback)}</p></footer>
+    <div class="case-actions"><button class="case-cta" type="button" data-case-node="${escapeHtml(item.nodeId)}">CodeMap · 관련 구조와 코드 보기 <span aria-hidden="true">↓</span></button></div>
   `;
 
   els.caseDetail.querySelectorAll("[data-app-view]").forEach((button) => {
     button.addEventListener("click", () => setAppView(button.dataset.appView));
+  });
+  els.caseDetail.querySelector("[data-case-node]").addEventListener("click", (event) => {
+    const nodeId = event.currentTarget.dataset.caseNode;
+    setAppView("systems", { updateHash: false });
+    selectNode(nodeId, { pushHistory: false, preserveScroll: false });
+    document.getElementById("graph-wrap").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 
