@@ -596,10 +596,10 @@ const cases = [
   {
     id: "fusion-pvp",
     number: "04",
-    title: "Photon Fusion 전투 동기화 통합",
+    title: "Photon Fusion 1대1 전투 연동",
     nodeId: "pvpProjectile",
     card: "선택한 무기·속성·증강을 네트워크 투사체로 복구하고, 피격·VFX·팝업까지 같은 사건으로 보이게 한 사례",
-    situation: "향후 1:1 PvP와 협동 레이드 확장을 염두에 두고, 로컬 전투에서 쓰던 무기·속성·증강·데미지를 Fusion 환경에서도 재현해야 했습니다. 특히 호스트와 클라이언트에 따라 스폰 위치, 카메라 방향, VFX 회전이 달라져 보정 기준이 필요했습니다.",
+    situation: "1대1 PvP에서 로컬 전투의 무기·속성·증강·데미지를 Photon Fusion 환경에 연결해야 했습니다. 호스트와 클라이언트에 따라 스폰 위치, 카메라 방향, VFX 회전이 달라져 보정 기준이 필요했습니다. 협동 레이드 등은 별도의 확장 방향으로 남겼습니다.",
     alternatives: "로컬 ScriptableObject 참조를 네트워크 흐름에 직접 의존 / 발사 시 필요한 데이터를 Payload로 직렬화하고 런타임 Behavior로 복구",
     decision: "NetworkProjectileFireHandler가 BehaviorCode·Level·속성 정보를 Payload로 만들고, ProjectileBehaviorRegistry가 네트워크 투사체에서 runtime Behavior로 복구하도록 구성했습니다. Network Object 생성, hit, VFX·damage popup을 분리된 RPC 흐름으로 연결했습니다.",
     structure: ["발사 입력", "Fire Handler", "Augment Payload", "Runner.Spawn", "Network Projectile", "Hit·VFX·Popup RPC"],
@@ -738,7 +738,7 @@ function renderCaseDetail(item) {
   });
   els.caseDetail.querySelector("[data-case-node]").addEventListener("click", (event) => {
     const nodeId = event.currentTarget.dataset.caseNode;
-    setAppView("systems", { updateHash: false });
+    setAppView("systems", { updateHash: false, resetNode: false });
     selectNode(nodeId, { pushHistory: false, preserveScroll: false });
     document.getElementById("graph-wrap").scrollIntoView({ behavior: "smooth", block: "start" });
   });
@@ -768,7 +768,7 @@ function setAppView(view, options = {}) {
   els.caseHub.hidden = true;
   els.layout.hidden = false;
   updateAppNavigation(view);
-  if (view === "systems") {
+  if (view === "systems" && options.resetNode !== false) {
     selectNode("overview", { pushHistory: false, preserveScroll: false, preserveCase: true });
   }
   if (options.updateHash !== false) history.replaceState(null, "", `#${view}`);
@@ -1294,7 +1294,7 @@ function openInitialView() {
 
 renderCaseCards();
 renderTree();
-selectNode("overview", { pushHistory: false, preserveScroll: false, preserveCase: true });
-openInitialView();
+if (window.location.hash.startsWith("#case=")) openInitialView();
+else selectNode("overview", { pushHistory: false, preserveScroll: false, preserveCase: true }).then(openInitialView);
 window.addEventListener("hashchange", openInitialView);
 window.addEventListener("codemap-input-v2-ready", openInitialView);

@@ -29,6 +29,6 @@
 - [Grid Cell 기반 속성 전장](https://sj97p.github.io/Shield-Shot-CodeMap/#case=grid-cell)
 - [양손 조작 Input V1 → V2](https://sj97p.github.io/Shield-Shot-CodeMap/#case=input-v1-v2)
 - [증강 조합과 투사체 행동 주입](https://sj97p.github.io/Shield-Shot-CodeMap/#case=projectile-augment)
-- [Photon Fusion 전투 동기화 통합](https://sj97p.github.io/Shield-Shot-CodeMap/#case=fusion-pvp)
+- [Photon Fusion 1대1 전투 연동](https://sj97p.github.io/Shield-Shot-CodeMap/#case=fusion-pvp)
 
 </details>
