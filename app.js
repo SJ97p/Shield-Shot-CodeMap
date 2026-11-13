@@ -563,7 +563,7 @@ const cases = [
     structure: ["투사체 궤적", "WorldToCell", "ElementFieldCellData[,] 갱신", "속성·지형 반응", "몬스터 효과·VFX"],
     implementation: "ElementFieldGrid가 Cell 배열과 월드 좌표 변환을 맡고, ElementReactionResolver가 화살 속성·지형 속성 조합을 해석합니다. 얼음과 물의 연결 영역은 Queue와 방문 집합으로 탐색했습니다.",
     evidence: "불+풀, 바람+사막, 얼음+물 반응을 실제 전투 GIF로 확인했습니다. 얼음과 물은 반경 판정 대신 연결된 물 Cell만 Queue와 방문 집합으로 탐색하는 BFS Flood Fill로 동결 영역을 결정했습니다.",
-    feedback: "이 사례는 성능 수치를 측정한 결과가 아니라, 속성 필드의 판정 기준을 데이터로 통일해 반응을 구현한 결과입니다. PvP에서 Cell 상태가 전투 판정으로 확장된다면 active cell 동기화 정책을 별도로 설계해야 합니다.",
+    feedback: "속성 필드의 판정 기준을 Cell 데이터로 통일해 지형 반응을 처리했습니다. 처리 시간은 별도로 측정하지 않았습니다. PvP에서도 이 상태를 전투 판정에 사용하려면 활성 Cell의 동기화 기준이 추가로 필요합니다.",
   },
   {
     id: "input-v1-v2",
@@ -577,7 +577,7 @@ const cases = [
     structure: ["Unity Pointer", "Movement Filter", "Combat Router", "Attack·Defense Interpreter", "Weapon·Shield Adapter"],
     implementation: "PointerMovementThresholdFilter가 작은 이동을 먼저 제외하고, CombatPointerRouter가 시작 위치로 정한 채널을 유지합니다. 무기와 방패는 각 Interpreter·Adapter를 통해 입력을 소비합니다.",
     evidence: "동일한 10초 선형 드래그 12,010개 샘플을 V1과 V2에 각각 10회 주입했습니다. Input Marker 누적 비용은 Windows Development Build에서 76.36%, Galaxy S23+에서 65.83% 감소했습니다. 전체 FPS 개선 수치가 아니라 입력 파이프라인만 측정한 결과입니다.",
-    feedback: "실제 모바일 입력 불안정을 수치로 해결했다는 주장은 하지 않습니다. 다음에는 이 파이프라인과 네트워크 Tick·송신 정책을 연결해 입력 빈도와 원격 반응을 함께 검증해야 합니다.",
+    feedback: "측정은 같은 입력 샘플을 반복 주입한 조건에서 진행했습니다. 실제 손 조작의 안정성과 네트워크 Tick·송신 주기에 따른 원격 반응은 추가로 확인할 부분입니다.",
   },
   {
     id: "projectile-augment",
@@ -605,7 +605,7 @@ const cases = [
     structure: ["발사 입력", "Fire Handler", "Augment Payload", "Runner.Spawn", "Network Projectile", "Hit·VFX·Popup RPC"],
     implementation: "NetworkProjectileFireHandler가 선택 데이터를 Payload로 직렬화하고, NetworkProjectileActor가 스폰 뒤 Registry를 통해 Behavior를 복구합니다. 피격 정보와 시각 피드백은 각 RPC 처리 경계에서 분리했습니다.",
     evidence: "두 클라이언트에서 무기·방패가 생성되는 장면과 피격 VFX·damage popup 동기화 GIF를 확인했습니다. Wind·Ice 시각 효과 전체 동기화는 기반만 마련했고 최종 검증이 남았습니다.",
-    feedback: "완성된 경쟁 모드가 아니라 확장을 위한 전투 기반입니다. 무기 ID·payload 버전·active field sync의 검증 기준을 별도 문서와 테스트로 강화해야 합니다.",
+    feedback: "1대1 전투에 필요한 투사체 생성과 피격 피드백을 연결했습니다. 이후 무기 ID와 Payload 버전이 달라질 때의 처리, 활성 필드 상태 동기화를 추가로 검증할 필요가 있습니다.",
   },
 ];
 
